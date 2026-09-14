@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ng-green: #58cc02;
+  --color-ng-green-dark: #3fa302;
+  --color-ng-blue: #1cb0f6;
+  --color-ng-blue-dark: #1489c9;
+  --color-ng-yellow: #ffc800;
+  --color-ng-yellow-dark: #d9a400;
+  --color-ng-orange: #ff9600;
+  --color-ng-orange-dark: #d67c00;
+  --color-ng-red: #ff4b4b;
+  --color-ng-red-dark: #d13a3a;
+  --color-ng-purple: #b45ce2;
+  --color-ng-purple-dark: #8e43bd;
+  --color-ng-teal: #00b5a5;
+  --color-ng-ink: #2b2b3a;
+  --color-ng-cream: #fff8e7;
+  --color-ng-sand: #ffe9c7;
+  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ng-ink);
+  background:
+    radial-gradient(circle at 12% 8%, #ffe9a8 0%, transparent 45%),
+    radial-gradient(circle at 88% 4%, #b6f0c9 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, #ffd9a8 0%, transparent 55%),
+    linear-gradient(180deg, #fffdf5 0%, #f4fbef 100%);
+  background-attachment: fixed;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+/* ---------- Boutons "3D" façon Duolingo ---------- */
+.btn3d {
+  position: relative;
+  border-radius: 1.25rem;
+  border-bottom-width: 6px;
+  border-bottom-style: solid;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: transform 0.08s ease, filter 0.15s ease;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  user-select: none;
+}
+.btn3d:active:not(:disabled) {
+  transform: translateY(4px);
+  border-bottom-width: 2px;
+}
+.btn3d:disabled {
+  filter: grayscale(0.35) opacity(0.65);
+  cursor: not-allowed;
+}
+
+/* ---------- Cartes ---------- */
+.card-soft {
+  border-radius: 1.75rem;
+  background: #ffffff;
+  border: 3px solid #2b2b3a12;
+  box-shadow: 0 10px 0 rgba(43, 43, 58, 0.07);
+}
+
+/* ---------- Bande de tissu (wax/kente) ---------- */
+.kente {
+  background-image: repeating-linear-gradient(
+    90deg,
+    #ff9600 0 14px,
+    #ffc800 14px 28px,
+    #58cc02 28px 42px,
+    #1cb0f6 42px 56px,
+    #b45ce2 56px 70px
+  );
+}
+.kente-soft {
+  background-image: repeating-linear-gradient(
+    90deg,
+    #ffd9a1 0 18px,
+    #ffe9c7 18px 36px,
+    #d8f5c0 36px 54px,
+    #cdefff 54px 72px
+  );
+}
+
+.dashed-path {
+  background-image: linear-gradient(
+    to bottom,
+    #2b2b3a30 0 12px,
+    transparent 12px 26px
+  );
+  background-size: 6px 26px;
+  background-repeat: repeat-y;
+  background-position: center;
+}
+
+/* ---------- Animations ---------- */
+@keyframes ng-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes ng-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes ng-wiggle {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes ng-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+@keyframes ng-rise {
+  0% { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes ng-sparkle {
+  0% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
+  50% { transform: scale(1.1) rotate(20deg); opacity: 1; }
+  100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
+}
+
+.anim-float { animation: ng-float 3.4s ease-in-out infinite; }
+.anim-pop { animation: ng-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-wiggle { animation: ng-wiggle 1.6s ease-in-out infinite; }
+.anim-shake { animation: ng-shake 0.4s ease-in-out; }
+.anim-rise { animation: ng-rise 0.35s ease-out both; }
+.anim-sparkle { animation: ng-sparkle 2s ease-in-out infinite; }
+
+/* ---------- Accessibilité ---------- */
+.tap-target {
+  min-height: 64px;
+  min-width: 64px;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-float, .anim-wiggle, .anim-sparkle { animation: none; }
+}
