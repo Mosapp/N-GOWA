@@ -243,7 +243,9 @@ export function SortGame({
 
   const grand = complexite === "grand";
   const tailleBac = bacs.length >= 4 ? 70 : bacs.length === 3 ? 84 : 96;
-  const tailleObjet = objets.length > 6 ? 64 : 72;
+  // Plus gros sur tablette et PC, sans gêner les petits écrans.
+  const base = objets.length > 6 ? 64 : 72;
+  const tailleObjet = `clamp(${base}px, 11vw, ${Math.round(base * 1.3)}px)`;
 
   return (
     <div className="flex min-h-[calc(100dvh-88px)] flex-col">
@@ -312,8 +314,9 @@ export function SortGame({
                     actif ? "border-ng-yellow shadow-[0_0_0_5px_rgba(246,180,39,0.35),0_8px_0_rgba(45,42,38,0.18)]" : "border-white shadow-[0_6px_0_rgba(45,42,38,0.18)]"
                   } ${secoue ? "anim-shake" : ""} cursor-grab active:cursor-grabbing`}
                   style={{
-                    width: tailleObjet,
-                    height: tailleObjet,
+                    fontSize: tailleObjet,
+                    width: "1em",
+                    height: "1em",
                     ...(envol
                       ? {
                           transition: `transform ${DUREE_ENVOL}ms cubic-bezier(.5,-0.3,.7,1), opacity ${DUREE_ENVOL}ms ease-in`,
@@ -323,7 +326,7 @@ export function SortGame({
                       : null),
                   }}
                 >
-                  <span style={{ fontSize: tailleObjet * (grand ? 0.56 : 0.6), lineHeight: 1 }} aria-hidden>
+                  <span style={{ fontSize: grand ? "0.56em" : "0.6em", lineHeight: 1 }} aria-hidden>
                     {o.emoji}
                   </span>
                 </button>
