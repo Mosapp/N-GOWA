@@ -88,6 +88,15 @@ async function repondreQuestion(page) {
   await page.getByRole("button", { name: "Voir mon résultat" }).click();
 }
 
+/** Ferme les célébrations de pins (les pins déjà mérités sont attribués à l'ouverture). */
+async function fermerCelebrations(page) {
+  await page.waitForTimeout(300);
+  while (await page.getByRole("button", { name: "Super !" }).isVisible().catch(() => false)) {
+    await page.getByRole("button", { name: "Super !" }).click();
+    await page.waitForTimeout(200);
+  }
+}
+
 async function lancerMission(page, numero, zone = /^Le Village du Tri/) {
   await page.getByRole("button", { name: zone }).first().click();
   await page.getByRole("button", { name: new RegExp(`^Mission ${numero} :`) }).click();
@@ -257,6 +266,7 @@ try {
   }, SAVE_KEY);
   await riv.reload();
   await riv.getByRole("button", { name: "Continuer l'aventure" }).first().click();
+  await fermerCelebrations(riv);
   ok(
     await riv.getByRole("button", { name: /^La Rivière Vivante : 0 missions sur 3/ }).first().isVisible(),
     "la Rivière Vivante s'ouvre après le Village",
@@ -292,6 +302,7 @@ try {
   }, SAVE_KEY);
   await foret.reload();
   await foret.getByRole("button", { name: "Continuer l'aventure" }).first().click();
+  await fermerCelebrations(foret);
   ok(
     await foret.getByRole("button", { name: /^La Forêt des Découvertes : 0 missions sur 3/ }).first().isVisible(),
     "la Forêt s'ouvre après la Rivière",
@@ -328,10 +339,7 @@ try {
   await en.reload();
   await en.getByRole("button", { name: "Continuer l'aventure" }).first().click();
   // Les pins des zones déjà terminées sont célébrés au retour.
-  while (await en.getByRole("button", { name: "Super !" }).isVisible().catch(() => false)) {
-    await en.getByRole("button", { name: "Super !" }).click();
-    await en.waitForTimeout(200);
-  }
+  await fermerCelebrations(en);
   ok(
     await en.getByRole("button", { name: /^Le Royaume de l'Énergie : 0 missions sur 3/ }).first().isVisible(),
     "le Royaume de l'Énergie s'ouvre après la Forêt",
