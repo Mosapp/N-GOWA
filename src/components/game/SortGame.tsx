@@ -1,27 +1,52 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import { Bin } from "@/components/art/Bin";
-import { Btn, ListenButton, Mascot } from "@/components/ui";
-import { IconCheck } from "@/components/icons";
+import { ListenButton, Mascot } from "@/components/ui";
 import { BACS } from "@/content/village";
 import type { BacId, Complexite, ObjetATrier } from "@/content/types";
 import { pointsObjet, type ResultatObjet } from "@/lib/game/rules";
 import { playTone, speak } from "@/lib/audio";
 
 const BRAVOS = ["Bravo !", "Super !", "Bien joué !", "Excellent !", "Tu as trouvé !"];
-/** Après deux essais, le bon bac brille pour aider l'enfant. */
+/** Après deux essais sur un même déchet, le bon bac brille pour aider l'enfant. */
 const ESSAIS_AVANT_AIDE = 2;
+/** Durée du vol du déchet vers la poubelle. */
+const DUREE_ENVOL = 450;
 
 type Retour =
-  | { type: "bon"; titre: string; texte: string; points: number }
-  | { type: "erreur"; texte: string };
+  | { type: "bon"; titre: string; texte: string; cle: number }
+  | { type: "erreur"; texte: string; cle: number };
 
 /**
- * Mini-jeu « Glisse le déchet dans la bonne poubelle ».
- * - glisser-déposer au doigt ou à la souris ;
- * - ou toucher directement un bac (plus simple pour les petits, et accessible au clavier) ;
+ * Disposition des déchets en rangées un peu désordonnées, comme s'ils
+ * traînaient par terre. `f` va de 0 (rangée du fond) à 1 (rangée de devant).
+ * Déterministe : la même liste donne toujours la même disposition.
+ */
+function positions(n: number): { x: number; f: number; angle: number }[] {
+  const colonnes = n <= 3 ? n : n <= 6 ? 3 : 4;
+  const rangees = Math.ceil(n / colonnes);
+  return Array.from({ length: n }, (_, i) => {
+    const rangee = Math.floor(i / colonnes);
+    const dansRangee = rangee === rangees - 1 ? n - rangee * colonnes : colonnes;
+    const col = i % colonnes;
+    const decalX = Math.sin(i * 12.9898) * 4;
+    const decalF = Math.cos(i * 78.233) * 0.07;
+    return {
+      x: ((col + 0.5) / dansRangee) * 80 + 10 + decalX,
+      f: Math.min(1, Math.max(0, (rangees === 1 ? 0.5 : rangee / (rangees - 1)) + decalF)),
+      angle: Math.round(Math.sin(i * 4.1) * 14),
+    };
+  });
+}
+
+/**
+ * Mini-jeu « Ramasse les déchets et mets-les dans la bonne poubelle ».
+ * - les déchets traînent dans la scène : l'enfant attrape celui qu'il veut ;
+ * - glisser-déposer au doigt ou à la souris jusqu'à la poubelle ;
+ * - ou toucher un déchet puis une poubelle (plus simple pour les petits, et
+ *   accessible au clavier) ;
  * - après une erreur, un indice, et on réessaie autant qu'on veut.
  */
 export function SortGame({
@@ -29,98 +54,154 @@ export function SortGame({
   bacs,
   complexite,
   consigne,
+  scene,
   onFinish,
 }: {
   objets: ObjetATrier[];
   bacs: BacId[];
   complexite: Complexite;
   consigne: string;
+  scene: string;
   onFinish: (resultats: ResultatObjet[]) => void;
 }) {
-  const [index, setIndex] = useState(0);
-  const [essais, setEssais] = useState(0);
+  const [ranges, setRanges] = useState<string[]>([]);
+  const [envols, setEnvols] = useState<Record<string, { dx: number; dy: number }>>({});
+  const [choisi, setChoisi] = useState<string | null>(objets[0]?.id ?? null);
+  const [essais, setEssais] = useState<Record<string, number>>({});
   const [retour, setRetour] = useState<Retour | null>(null);
   const [survol, setSurvol] = useState<BacId | null>(null);
   const [ouvert, setOuvert] = useState<BacId | null>(null);
-  const [secousse, setSecousse] = useState(0);
-  const [envol, setEnvol] = useState<{ dx: number; dy: number } | null>(null);
+  const [gain, setGain] = useState<{ bac: BacId; points: number; cle: number } | null>(null);
+  const [secousse, setSecousse] = useState<{ id: string; cle: number } | null>(null);
+  const [tenu, setTenu] = useState<string | null>(null);
   const resultats = useRef<ResultatObjet[]>([]);
+  const fini = useRef(false);
+  const compteur = useRef(0);
 
-  const objetRef = useRef<HTMLButtonElement>(null);
+  const objetRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+
+  // La taille des objets suit la scène (et non l'écran) : ils restent dedans.
+  useEffect(() => {
+    const el = sceneRef.current;
+    if (!el) return;
+    const mesurer = () => setDims({ w: el.clientWidth, h: el.clientHeight });
+    mesurer();
+    const obs = new ResizeObserver(mesurer);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const bacRefs = useRef<Partial<Record<BacId, HTMLButtonElement | null>>>({});
-  const glisse = useRef<{ x: number; y: number; id: number; bouge: boolean } | null>(null);
+  const glisse = useRef<{ x: number; y: number; id: number; objetId: string; bouge: boolean } | null>(null);
 
-  const objet = objets[index];
-  const termine = retour?.type === "bon";
-  const aide = !termine && essais >= ESSAIS_AVANT_AIDE ? objet?.bac : null;
+  const illustree = objets.every((o) => o.image);
+  const [places] = useState(() => positions(objets.length));
+  const restants = objets.filter((o) => !ranges.includes(o.id));
+  const enJeu = objets.filter((o) => !ranges.includes(o.id) || envols[o.id]);
+  const objetChoisi = restants.find((o) => o.id === choisi) ?? restants[0] ?? null;
+  const aide =
+    objetChoisi && (essais[objetChoisi.id] ?? 0) >= ESSAIS_AVANT_AIDE ? objetChoisi.bac : null;
 
   useEffect(() => {
-    if (!objet) return;
-    const t = window.setTimeout(() => speak(objet.nom), index === 0 ? 900 : 200);
+    const t = window.setTimeout(() => speak(consigne), 600);
     return () => window.clearTimeout(t);
-  }, [objet, index]);
+  }, [consigne]);
 
-  const remettreEnPlace = () => {
-    if (objetRef.current) {
-      objetRef.current.style.transition = "transform 180ms ease-out";
-      objetRef.current.style.transform = "";
+  // Les bulles et les « +points » disparaissent seules : le jeu ne s'arrête pas.
+  useEffect(() => {
+    if (!retour) return;
+    const t = window.setTimeout(() => setRetour(null), retour.type === "bon" ? 3200 : 4500);
+    return () => window.clearTimeout(t);
+  }, [retour]);
+  useEffect(() => {
+    if (!gain) return;
+    // Le couvercle reste ouvert le temps que le déchet tombe, puis se referme.
+    const t = window.setTimeout(() => {
+      setGain(null);
+      setOuvert(null);
+      playTone("clac");
+    }, 750);
+    return () => window.clearTimeout(t);
+  }, [gain]);
+
+  const remettreEnPlace = (id: string) => {
+    const el = objetRefs.current[id];
+    if (el) {
+      el.style.transition = "transform 200ms ease-out";
+      el.style.transform = "";
     }
   };
 
-  const choisir = useCallback(
-    (bac: BacId) => {
-      if (!objet || termine) return;
-      const tentative = essais + 1;
-      setEssais(tentative);
-      setSurvol(null);
+  const selectionner = (o: ObjetATrier) => {
+    setChoisi(o.id);
+    playTone("pop");
+    speak(o.nom);
+  };
 
-      if (bac === objet.bac) {
-        const points = pointsObjet(tentative);
-        resultats.current = [
-          ...resultats.current,
-          { objetId: objet.id, competence: objet.competence, essais: tentative },
-        ];
-        // L'objet s'envole dans le bac.
-        const cible = bacRefs.current[bac]?.getBoundingClientRect();
-        const source = objetRef.current?.getBoundingClientRect();
-        if (cible && source && objetRef.current) {
-          objetRef.current.style.transition = "";
-          objetRef.current.style.transform = "";
-          setEnvol({
-            dx: cible.left + cible.width / 2 - (source.left + source.width / 2),
-            dy: cible.top + cible.height * 0.35 - (source.top + source.height / 2),
-          });
-        }
-        setOuvert(bac);
-        playTone("good");
-        const titre = tentative === 1 ? BRAVOS[index % BRAVOS.length] : "Tu n'as pas abandonné, bravo !";
-        setRetour({ type: "bon", titre, texte: objet.pourquoi, points });
-        speak(`${titre} ${objet.pourquoi}`);
-      } else {
-        remettreEnPlace();
-        playTone("bad");
-        setSecousse((s) => s + 1);
-        const texte =
-          tentative >= ESSAIS_AVANT_AIDE
-            ? `${objet.indice} Regarde la poubelle qui brille !`
-            : `${objet.indice} Essaie encore !`;
-        setRetour({ type: "erreur", texte });
-        speak(`Presque ! ${texte}`);
-      }
-    },
-    [essais, index, objet, termine],
-  );
+  const trier = (o: ObjetATrier, bac: BacId) => {
+    if (ranges.includes(o.id)) return;
+    const tentative = (essais[o.id] ?? 0) + 1;
+    setEssais((e) => ({ ...e, [o.id]: tentative }));
+    setSurvol(null);
 
-  const suivant = () => {
-    setRetour(null);
-    setEssais(0);
-    setOuvert(null);
-    setEnvol(null);
-    if (index + 1 >= objets.length) {
-      playTone("win");
-      onFinish(resultats.current);
-    } else {
-      setIndex(index + 1);
+    if (bac !== o.bac) {
+      remettreEnPlace(o.id);
+      setChoisi(o.id);
+      playTone("bad");
+      setSecousse({ id: o.id, cle: ++compteur.current });
+      const texte =
+        tentative >= ESSAIS_AVANT_AIDE
+          ? `${o.indice} Regarde la poubelle qui brille !`
+          : `${o.indice} Essaie encore !`;
+      setRetour({ type: "erreur", texte, cle: ++compteur.current });
+      speak(`Presque ! ${texte}`);
+      return;
+    }
+
+    const points = pointsObjet(tentative);
+    resultats.current = [...resultats.current, { objetId: o.id, competence: o.competence, essais: tentative }];
+
+    // Le déchet s'envole dans la poubelle, depuis l'endroit où il a été lâché.
+    const el = objetRefs.current[o.id];
+    const cible = bacRefs.current[bac]?.getBoundingClientRect();
+    const source = el?.getBoundingClientRect();
+    if (el && cible && source) {
+      const actuel = new DOMMatrixReadOnly(getComputedStyle(el).transform === "none" ? undefined : getComputedStyle(el).transform);
+      setEnvols((v) => ({
+        ...v,
+        [o.id]: {
+          dx: actuel.m41 + cible.left + cible.width / 2 - (source.left + source.width / 2),
+          dy: actuel.m42 + cible.top + cible.height * 0.3 - (source.top + source.height / 2),
+        },
+      }));
+    }
+    const nouveauxRanges = [...ranges, o.id];
+    setRanges(nouveauxRanges);
+    window.setTimeout(() => {
+      setEnvols((v) => {
+        const suite = { ...v };
+        delete suite[o.id];
+        return suite;
+      });
+    }, DUREE_ENVOL + 50);
+
+    setOuvert(bac);
+    setGain({ bac, points, cle: ++compteur.current });
+    playTone("good");
+    const titre =
+      tentative === 1 ? BRAVOS[resultats.current.length % BRAVOS.length] : "Tu n'as pas abandonné, bravo !";
+    setRetour({ type: "bon", titre, texte: o.pourquoi, cle: ++compteur.current });
+    speak(`${titre} ${o.pourquoi}`);
+
+    const suivant = objets.find((x) => !nouveauxRanges.includes(x.id));
+    setChoisi(suivant?.id ?? null);
+    if (!suivant && !fini.current) {
+      fini.current = true;
+      window.setTimeout(() => {
+        playTone("win");
+        onFinish(resultats.current);
+      }, 1600);
     }
   };
 
@@ -134,130 +215,216 @@ export function SortGame({
     return null;
   };
 
-  const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>) => {
-    if (termine) return;
+  const onPointerDown = (o: ObjetATrier, e: ReactPointerEvent<HTMLButtonElement>) => {
+    if (ranges.includes(o.id)) return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    glisse.current = { x: e.clientX, y: e.clientY, id: e.pointerId, bouge: false };
-    if (objetRef.current) objetRef.current.style.transition = "none";
+    glisse.current = { x: e.clientX, y: e.clientY, id: e.pointerId, objetId: o.id, bouge: false };
+    e.currentTarget.style.transition = "none";
   };
 
-  const onPointerMove = (e: ReactPointerEvent<HTMLButtonElement>) => {
+  const onPointerMove = (o: ObjetATrier, e: ReactPointerEvent<HTMLButtonElement>) => {
     const g = glisse.current;
-    if (!g || g.id !== e.pointerId) return;
+    if (!g || g.id !== e.pointerId || g.objetId !== o.id) return;
     const dx = e.clientX - g.x;
     const dy = e.clientY - g.y;
-    if (!g.bouge && Math.hypot(dx, dy) > 8) g.bouge = true;
+    if (!g.bouge && Math.hypot(dx, dy) > 8) {
+      g.bouge = true;
+      setTenu(o.id);
+      setChoisi(o.id);
+      playTone("pop");
+    }
     if (!g.bouge) return;
-    if (objetRef.current) objetRef.current.style.transform = `translate(${dx}px, ${dy}px) scale(0.85) rotate(${dx / 20}deg)`;
+    e.currentTarget.style.transform = `translate(${dx}px, ${dy}px) scale(1.15) rotate(${dx / 25}deg)`;
     const dessous = bacSous(e.clientX, e.clientY);
     if (dessous !== survol) setSurvol(dessous);
   };
 
-  const onPointerUp = (e: ReactPointerEvent<HTMLButtonElement>) => {
+  const onPointerUp = (o: ObjetATrier, e: ReactPointerEvent<HTMLButtonElement>) => {
     const g = glisse.current;
     glisse.current = null;
+    setTenu(null);
     if (!g || g.id !== e.pointerId) return;
     if (!g.bouge) {
-      // Simple toucher : on réécoute le nom de l'objet.
-      remettreEnPlace();
-      if (objet) speak(objet.nom);
+      // Simple toucher : on prend ce déchet et on entend son nom.
+      remettreEnPlace(o.id);
+      selectionner(o);
       return;
     }
     const dessous = bacSous(e.clientX, e.clientY);
-    if (dessous) choisir(dessous);
+    if (dessous) trier(o, dessous);
     else {
       setSurvol(null);
-      remettreEnPlace();
+      remettreEnPlace(o.id);
     }
   };
 
-  if (!objet) return null;
-
   const grand = complexite === "grand";
-  const tailleBac = bacs.length >= 4 ? 70 : bacs.length === 3 ? 84 : 96;
+  const w = dims?.w ?? 340;
+  const h = dims?.h ?? 420;
+  const borne = (v: number, min: number, max: number) => Math.round(Math.min(max, Math.max(min, v)));
+  // Les poubelles sont posées au sol, en bas de la scène.
+  const tailleBac = borne(Math.min(((w - 16) / bacs.length) * 0.78, h * 0.19), 50, 112);
+  const hauteurBacs = Math.round(tailleBac * 1.12 + 30);
+  /** Taille en px d'un objet ; les objets dessinés rapetissent au fond. */
+  const taille = (o: ObjetATrier, f: number) => {
+    if (!o.image) return borne(Math.min(w * 0.18, h * 0.13), 50, objets.length > 6 ? 84 : 94);
+    return borne(Math.min(w * 0.21, h * 0.13) * (0.8 + f * 0.3), 46, 110);
+  };
+  /** Centre en px de l'objet : entre le haut du sol et les poubelles, jamais hors de la scène. */
+  const centre = (x: number, f: number, t: number) => {
+    const zoneHaut = Math.max(58, h * (illustree ? 0.44 : 0.2)) + t / 2;
+    const zoneBas = Math.max(zoneHaut, h - hauteurBacs - 6 - t / 2);
+    return {
+      left: borne((x / 100) * w, t / 2 + 6, w - t / 2 - 6),
+      top: Math.round(zoneHaut + f * (zoneBas - zoneHaut)),
+    };
+  };
 
   return (
     <div className="flex min-h-[calc(100dvh-88px)] flex-col">
-      {/* Consigne et progression */}
+      {/* Consigne et compteur */}
       <div className="flex items-center gap-3">
         <p className="min-w-0 flex-1 font-display text-xl leading-tight">{consigne}</p>
         <ListenButton texte={consigne} />
       </div>
-      <ol className="mt-3 flex flex-wrap gap-1.5" aria-label={`Objet ${index + 1} sur ${objets.length}`}>
-        {objets.map((o, i) => (
-          <li
-            key={o.id}
-            className={`flex h-7 w-7 items-center justify-center rounded-full border-2 text-white ${
-              i < index || (i === index && termine)
-                ? "border-ng-green bg-ng-green"
-                : i === index
-                  ? "border-ng-yellow-dark bg-ng-yellow"
-                  : "border-ng-ink/15 bg-white"
-            }`}
-          >
-            {i < index || (i === index && termine) ? <IconCheck size={16} strokeWidth={3.5} /> : null}
-          </li>
-        ))}
-      </ol>
 
-      {/* Scène : l'objet à trier */}
-      <div className="relative flex flex-1 flex-col items-center justify-center py-4">
-        <button
-          key={`${objet.id}-${secousse}`}
-          ref={objetRef}
-          type="button"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => {
-            glisse.current = null;
-            remettreEnPlace();
-            setSurvol(null);
-          }}
-          className={`relative z-20 flex touch-none select-none flex-col items-center rounded-[2rem] border-4 border-white bg-white px-5 pb-3 pt-4 shadow-[0_10px_0_rgba(45,42,38,0.12)] ${
-            secousse && retour?.type === "erreur" ? "anim-shake" : "anim-pop"
-          }`}
-          style={
-            envol
-              ? {
-                  transition: "transform 420ms cubic-bezier(.5,-0.3,.7,1), opacity 420ms ease-in",
-                  transform: `translate(${envol.dx}px, ${envol.dy}px) scale(0.2)`,
-                  opacity: 0,
-                }
-              : undefined
-          }
-          aria-label={`${objet.nom}. Glisse-le dans une poubelle, ou touche une poubelle.`}
+      {/* Scène : les déchets traînent par terre */}
+      <div ref={sceneRef} className="relative mt-3 min-h-[380px] flex-1">
+        <div className="absolute inset-0 overflow-hidden rounded-[2rem] border-4 border-white shadow-[0_6px_0_rgba(45,42,38,0.1)]">
+          {/* eslint-disable-next-line @next/next/no-img-element -- illustration locale de la mission */}
+          <img src={scene} alt="" className="h-full w-full object-cover" draggable={false} />
+          {illustree ? null : <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/10 to-white/45" />}
+        </div>
+
+        <p
+          className="absolute right-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 font-display text-lg shadow"
+          aria-label={`${restants.length} déchet${restants.length > 1 ? "s" : ""} à ranger`}
         >
-          <span className={grand ? "text-[64px] leading-none" : "text-[80px] leading-none"} aria-hidden>
-            {objet.emoji}
-          </span>
-          <span className="mt-2 max-w-[200px] text-center font-display text-lg leading-tight">{objet.nom}</span>
-        </button>
-        {!termine && index === 0 && essais === 0 ? (
-          <p className="mt-3 flex items-center gap-2 text-sm font-bold text-ng-muted" aria-hidden>
-            <span className="anim-float inline-block">👆</span> Glisse vers le bas
+          {objets.length - restants.length} / {objets.length}
+        </p>
+
+        {enJeu.map((o) => {
+          const i = objets.indexOf(o);
+          const place = places[i];
+          const envol = envols[o.id];
+          const actif = objetChoisi?.id === o.id;
+          const secoue = secousse?.id === o.id;
+          const t = taille(o, place.f);
+          const { left, top } = centre(place.x, place.f, t);
+          return (
+            <div
+              key={o.id}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ left, top, zIndex: tenu === o.id || envol ? 60 : 20 + Math.round(place.f * 10) }}
+            >
+              <div
+                className={o.image ? "" : actif || envol ? "" : "anim-float"}
+                style={o.image ? { transform: `rotate(${place.angle}deg)` } : { animationDelay: `${(i % 5) * -0.7}s` }}
+              >
+                <button
+                  key={secoue ? secousse.cle : "repos"}
+                  ref={(el) => {
+                    objetRefs.current[o.id] = el;
+                  }}
+                  type="button"
+                  disabled={Boolean(envol)}
+                  onPointerDown={(e) => onPointerDown(o, e)}
+                  onPointerMove={(e) => onPointerMove(o, e)}
+                  onPointerUp={(e) => onPointerUp(o, e)}
+                  onPointerCancel={() => {
+                    glisse.current = null;
+                    setTenu(null);
+                    setSurvol(null);
+                    remettreEnPlace(o.id);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      selectionner(o);
+                    }
+                  }}
+                  aria-pressed={actif}
+                  aria-label={`${o.nom}. Glisse-le dans une poubelle, ou touche-le puis touche une poubelle.`}
+                  className={`flex touch-none select-none items-center justify-center ${
+                    o.image
+                      ? ""
+                      : `rounded-full border-4 bg-white/95 ${
+                          actif
+                            ? "border-ng-yellow shadow-[0_0_0_5px_rgba(246,180,39,0.35),0_8px_0_rgba(45,42,38,0.18)]"
+                            : "border-white shadow-[0_6px_0_rgba(45,42,38,0.18)]"
+                        }`
+                  } ${secoue ? "anim-shake" : ""} cursor-grab active:cursor-grabbing`}
+                  style={{
+                    fontSize: t,
+                    width: "1em",
+                    height: "1em",
+                    ...(envol
+                      ? {
+                          transition: `transform ${DUREE_ENVOL}ms cubic-bezier(.5,-0.3,.7,1), opacity ${DUREE_ENVOL}ms ease-in`,
+                          transform: `translate(${envol.dx}px, ${envol.dy}px) scale(0.2)`,
+                          opacity: 0,
+                        }
+                      : null),
+                  }}
+                >
+                  {o.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- objet dessiné local
+                    <img
+                      src={o.image}
+                      alt=""
+                      draggable={false}
+                      className="pointer-events-none h-full w-full object-contain"
+                      style={{
+                        filter: actif
+                          ? "drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(255,196,40,0.95))"
+                          : "drop-shadow(0 3px 2px rgba(45,30,20,0.3))",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: grand ? "0.56em" : "0.6em", lineHeight: 1 }} aria-hidden>
+                      {o.emoji}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Nom du déchet en main, et petite aide pour le premier geste */}
+        {objetChoisi && !retour ? (
+          <p className="pointer-events-none absolute left-3 top-3 z-10 max-w-[65%] truncate rounded-full bg-white/90 px-3 py-1 font-display text-lg shadow" aria-hidden>
+            {ranges.length === 0 && Object.keys(essais).length === 0 ? "👆 " : ""}
+            {objetChoisi.nom}
           </p>
         ) : null}
-      </div>
 
-      {/* Indice après une erreur */}
-      <div aria-live="polite" className="min-h-[4.5rem]">
-        {retour?.type === "erreur" ? (
-          <div className="anim-pop flex items-center gap-3 rounded-3xl border-3 border-ng-yellow bg-ng-sun-soft p-3" style={{ borderWidth: 3 }}>
-            <Mascot id="awa" size={64} humeur="indice" />
-            <p className="font-display text-base leading-snug">
-              <span className="text-ng-yellow-dark">Presque ! </span>
-              {retour.texte}
-            </p>
-          </div>
-        ) : null}
-      </div>
+        {/* Bulle de retour : ne bloque pas le jeu */}
+        <div aria-live="polite" className="pointer-events-none absolute inset-x-2 top-2 z-30">
+          {retour?.type === "bon" ? (
+            <div key={retour.cle} className="anim-pop flex items-center gap-2 rounded-3xl border-4 border-ng-leaf bg-ng-leaf-soft p-2 pr-3">
+              <Mascot id="kofi" size={56} humeur="joie" />
+              <p className="min-w-0 font-display text-base leading-snug">
+                <span className="text-ng-green-dark">{retour.titre} </span>
+                {retour.texte}
+              </p>
+            </div>
+          ) : retour?.type === "erreur" ? (
+            <div key={retour.cle} className="anim-pop flex items-center gap-2 rounded-3xl border-4 border-ng-yellow bg-ng-sun-soft p-2 pr-3">
+              <Mascot id="awa" size={56} humeur="indice" />
+              <p className="min-w-0 font-display text-base leading-snug">
+                <span className="text-ng-yellow-dark">Presque ! </span>
+                {retour.texte}
+              </p>
+            </div>
+          ) : null}
+        </div>
 
-      {/* Les bacs */}
-      <div
-        className="mt-2 grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${bacs.length}, minmax(0, 1fr))` }}
-      >
+        {/* Les poubelles, debout sur le sol devant la scène */}
+        <div
+          className="absolute inset-x-2 bottom-2 z-[35] grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${bacs.length}, minmax(0, 1fr))` }}
+        >
         {bacs.map((id) => {
           const bac = BACS[id];
           const actif = survol === id;
@@ -268,50 +435,47 @@ export function SortGame({
                 bacRefs.current[id] = el;
               }}
               type="button"
-              disabled={termine}
-              onClick={() => choisir(id)}
-              className={`flex flex-col items-center rounded-3xl px-1 pb-2 pt-1 transition-transform ${
-                actif ? "scale-105 bg-white" : "bg-white/50"
-              } ${aide === id ? "anim-glow bg-ng-sun-soft" : ""}`}
-              aria-label={`Mettre « ${objet.nom} » : ${bac.nom}`}
+              disabled={!objetChoisi}
+              onClick={() => objetChoisi && trier(objetChoisi, id)}
+              className={`relative flex flex-col items-center rounded-3xl pb-1 transition-transform duration-150 ${
+                actif ? "scale-110" : ""
+              } ${aide === id ? "anim-glow bg-ng-sun-soft/70" : ""}`}
+              aria-label={`Mettre « ${objetChoisi?.nom ?? ""} » : ${bac.nom}`}
             >
-              <Bin bac={bac} ouvert={actif || ouvert === id} size={tailleBac} />
+              <span className="relative block">
+                {/* Ombre au sol sous la poubelle */}
+                <span
+                  className="absolute bottom-0 left-1/2 h-3 w-[90%] -translate-x-1/2 translate-y-1/2 rounded-[50%] bg-black/30 blur-[3px]"
+                  aria-hidden
+                />
+                <span
+                  key={gain?.bac === id ? gain.cle : "repos"}
+                  className={`relative block ${gain?.bac === id ? "anim-gobe" : ""}`}
+                  style={{ filter: actif ? "drop-shadow(0 0 8px rgba(255,255,255,0.95))" : undefined }}
+                >
+                  <Bin bac={bac} ouvert={actif || ouvert === id} size={tailleBac} />
+                </span>
+              </span>
               <span
-                className="mt-1 text-center font-display text-sm leading-tight"
+                className="mt-1 max-w-full truncate rounded-full bg-white/90 px-2 py-0.5 text-center font-display text-xs leading-tight shadow sm:text-sm"
                 style={{ color: bac.couleurFoncee }}
               >
                 {bac.nom}
               </span>
+              {gain?.bac === id ? (
+                <span
+                  key={gain.cle}
+                  className="anim-float-up pointer-events-none absolute -top-2 left-1/2 -ml-6 w-12 rounded-full bg-ng-yellow text-center font-display text-lg"
+                  aria-hidden
+                >
+                  +{gain.points}
+                </span>
+              ) : null}
             </button>
           );
         })}
-      </div>
-
-      {/* Bonne réponse : explication + suite */}
-      {retour?.type === "bon" ? (
-        <div
-          className="anim-rise fixed inset-x-0 bottom-0 z-30 border-t-4 border-ng-leaf bg-ng-leaf-soft px-4 pb-6 pt-4 safe-bottom"
-          role="status"
-        >
-          <div className="mx-auto flex max-w-xl items-start gap-3">
-            <Mascot id="kofi" size={78} humeur="joie" />
-            <div className="min-w-0 flex-1">
-              <p className="flex items-center justify-between gap-2 font-display text-2xl text-ng-green-dark">
-                {retour.titre}
-                <span className="anim-pop rounded-full bg-ng-yellow px-3 py-0.5 text-lg text-ng-ink">
-                  +{retour.points}
-                </span>
-              </p>
-              <p className="mt-1 text-base font-bold leading-snug text-ng-ink">{retour.texte}</p>
-            </div>
-          </div>
-          <div className="mx-auto mt-3 max-w-xl">
-            <Btn size="lg" onClick={suivant} sound="none">
-              Continuer
-            </Btn>
-          </div>
         </div>
-      ) : null}
+      </div>
     </div>
   );
 }

@@ -9,7 +9,7 @@
  * le localStorage de l'appareil.
  */
 
-const CACHE = "ngowa-v5";
+const CACHE = "ngowa-v7";
 const ESSENTIELS = [
   "/",
   "/manifest.webmanifest",
@@ -30,6 +30,18 @@ const ESSENTIELS = [
   ...["moussa", "fatou", "yann", "aicha", "kouame", "ama", "elephant", "tortue", "calao", "papillon", "chimpanze", "hippo", "kofi", "awa"].map(
     (n) => `/illustrations/avatars/${n}.webp`,
   ),
+  // Scènes de ramassage du village et leurs objets dessinés.
+  ...["marche-adjoua", "cour-ecole", "seconde-vie", "objets-dangereux"].map((n) => `/illustrations/scenes/${n}.webp`),
+  ...[
+    "sachet-eau", "bouteille-plastique", "sac-marche", "carton", "journal", "peau-banane", "epluchures-igname", "peau-mangue", "gobelet",
+    "bouteille-verre", "pot-miel", "feuille-dessin", "cahier-fini", "emballage-biscuit", "sachet-eau-ecole", "peau-orange", "reste-riz", "coco",
+    "bocal", "pagne", "carton-jouets", "cahier-moitie", "bidon", "sachet-dechire", "peau-banane-sv", "journal-mouille", "gobelet-casse",
+    "pile", "medicaments", "ampoule-cassee", "telephone-casse", "bouteille-danger", "epluchures-danger", "feuilles-marche", "enveloppe",
+  ].map((n) => `/illustrations/objets/${n}.webp`),
+  ...["plastique", "papier", "verre", "restes", "danger", "reutiliser", "trier"].flatMap((n) => [
+    `/illustrations/poubelles/${n}-corps.webp`,
+    `/illustrations/poubelles/${n}-couvercle.webp`,
+  ]),
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];

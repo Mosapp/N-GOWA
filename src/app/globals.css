@@ -263,6 +263,19 @@ body {
     opacity: 0;
   }
 }
+/* La poubelle « avale » le déchet : petit tassement puis rebond. */
+@keyframes ng-gobe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  45% {
+    transform: scale(1.06, 0.92);
+  }
+  75% {
+    transform: scale(0.97, 1.04);
+  }
+}
 @keyframes ng-wiggle {
   0%,
   100% {
@@ -273,6 +286,10 @@ body {
   }
 }
 
+.anim-gobe {
+  transform-origin: 50% 100%;
+  animation: ng-gobe 0.5s ease-out 0.4s;
+}
 .anim-float {
   animation: ng-float 3.4s ease-in-out infinite;
 }

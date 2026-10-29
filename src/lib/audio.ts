@@ -26,7 +26,7 @@ function getCtx(): AudioContext | null {
   return audioCtx;
 }
 
-export type Tone = "good" | "bad" | "win" | "tap" | "pop";
+export type Tone = "good" | "bad" | "win" | "tap" | "pop" | "clac";
 
 const RECIPES: Record<Tone, { freqs: number[]; duration: number; type: OscillatorType }> = {
   good: { freqs: [660, 880], duration: 0.16, type: "sine" },
@@ -35,6 +35,8 @@ const RECIPES: Record<Tone, { freqs: number[]; duration: number; type: Oscillato
   win: { freqs: [523, 659, 784, 1046], duration: 0.15, type: "sine" },
   tap: { freqs: [520], duration: 0.05, type: "sine" },
   pop: { freqs: [880, 1320], duration: 0.09, type: "sine" },
+  // Couvercle de poubelle qui se referme.
+  clac: { freqs: [196, 147], duration: 0.07, type: "triangle" },
 };
 
 export function playTone(tone: Tone) {

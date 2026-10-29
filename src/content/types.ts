@@ -194,6 +194,8 @@ export type ObjetATrier = {
   indice: string;
   /** Objet réservé aux 6-10 ans (plus difficile). */
   grandsSeulement?: boolean;
+  /** Objet dessiné et détouré, posé dans la scène de ramassage. */
+  image?: string;
 };
 
 export type QuestionMission = {
@@ -222,6 +224,8 @@ export type MissionContent = {
   defiId: string;
   /** Vignette illustrée de la mission (sinon, le décor de la zone). */
   vignette?: string;
+  /** Décor vide où l'on pose les objets dessinés à ramasser. */
+  scene?: string;
 };
 
 export type DefiReelContent = {

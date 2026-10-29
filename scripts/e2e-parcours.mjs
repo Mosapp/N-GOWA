@@ -41,18 +41,18 @@ async function creerProfil(page, tranche) {
 async function jouerTri(page, { glisser = true } = {}) {
   let objets = 0;
   let indices = 0;
+  const dechets = page.getByRole("button", { name: /Glisse-le dans une poubelle/ });
+  const bacs = page.getByRole("button", { name: /^Mettre « / });
   for (let garde = 0; garde < 20; garde += 1) {
-    const continuer = page.getByRole("button", { name: "Continuer", exact: true });
-    const bacs = page.getByRole("button", { name: /^Mettre « / });
+    const avant = await dechets.count();
+    if (!avant) break;
     const n = await bacs.count();
-    if (!n) break;
     let trouve = false;
     for (let i = 0; i < n && !trouve; i += 1) {
       const bac = bacs.nth(i);
-      if (glisser && i === 0) {
-        // Vrai glisser-déposer au pointeur.
-        const objet = page.getByRole("button", { name: /Glisse-le dans une poubelle/ });
-        const a = await objet.boundingBox();
+      if (glisser) {
+        // Vrai glisser-déposer au pointeur : on attrape le dernier déchet de la scène.
+        const a = await dechets.nth(avant - 1).boundingBox();
         const b = await bac.boundingBox();
         await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
         await page.mouse.down();
@@ -61,18 +61,15 @@ async function jouerTri(page, { glisser = true } = {}) {
       } else {
         await bac.click();
       }
-      await page.waitForTimeout(150);
-      if (await continuer.isVisible().catch(() => false)) trouve = true;
+      await page.waitForTimeout(650);
+      if ((await dechets.count()) < avant) trouve = true;
       else if (await page.getByText(/^Presque !/).isVisible().catch(() => false)) indices += 1;
     }
     if (!trouve) throw new Error("aucun bac n'a été accepté");
     objets += 1;
-    await continuer.click();
-    await page.waitForTimeout(100);
-    if (await page.getByRole("button", { name: "Voir mon résultat" }).count()) break;
-    if (await page.getByText("Mission réussie !").first().isVisible().catch(() => false)) break;
-    if (await page.getByText("La question d'Awa").isVisible().catch(() => false)) break;
   }
+  // Petite pause avant la suite (question ou résultat).
+  await page.waitForTimeout(1900);
   return { objets, indices };
 }
 
