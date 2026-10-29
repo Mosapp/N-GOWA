@@ -53,6 +53,16 @@ const DECORS = [
   ["Children_sorting_waste_in_courtyard_", "missions/cour-ecole", 960],
   ["Seamstress_repurposing_items_in_", "missions/seconde-vie", 960],
   ["Returning_used_batteries_and_med", "missions/objets-dangereux", 960],
+  // Vignettes des missions Rivière, Forêt et Énergie (3ᵉ lot d'images)
+  ["Washing_dishes_in_family_home_", "missions/chaque-goutte", 960],
+  ["Woman_washing_laundry_by_lagoon_", "missions/riviere-propre", 960],
+  ["Backyard_garden_after_rain_", "missions/tresor-de-l-eau", 960],
+  ["Animals_in_diverse_habitats_", "missions/qui-vit-ou", 960],
+  ["Bird_nest_and_planted_tree_", "missions/amis-nature", 960],
+  ["Beach_and_mangrove_habitat_cleaning_", "missions/maison-propre", 960],
+  ["Living_room_with_laundry_drying_", "missions/chasse-gaspillage", 960],
+  ["Neighborhood_with_renewable_ener", "missions/soleil-ami", 960],
+  ["Safe_home_electrical_practices_", "missions/electricite-sans-danger", 960],
 ];
 
 // Plusieurs dossiers sources possibles (un par lot d'images), séparés par des virgules.

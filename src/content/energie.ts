@@ -9,6 +9,7 @@ import type { DefiReelContent, MissionContent } from "./types";
 export const ENERGIE_MISSIONS: MissionContent[] = [
   {
     id: "chasse-gaspillage",
+    vignette: "/illustrations/missions/chasse-gaspillage.webp",
     zoneId: "royaume-energie",
     ordre: 1,
     titre: "Chasse au gaspillage",
@@ -116,6 +117,7 @@ export const ENERGIE_MISSIONS: MissionContent[] = [
   },
   {
     id: "soleil-ami",
+    vignette: "/illustrations/missions/soleil-ami.webp",
     zoneId: "royaume-energie",
     ordre: 2,
     titre: "Le soleil, notre ami",
@@ -227,6 +229,7 @@ export const ENERGIE_MISSIONS: MissionContent[] = [
   },
   {
     id: "electricite-sans-danger",
+    vignette: "/illustrations/missions/electricite-sans-danger.webp",
     zoneId: "royaume-energie",
     ordre: 3,
     titre: "L'électricité sans danger",
