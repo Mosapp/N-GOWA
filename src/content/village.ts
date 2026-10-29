@@ -5,6 +5,7 @@ import type {
   DefiReelContent,
   MissionContent,
 } from "./types";
+import { FORET_DEFIS, FORET_MISSIONS } from "./foret";
 import { RIVIERE_DEFIS, RIVIERE_MISSIONS } from "./riviere";
 import { ZONE_BY_ID } from "./zones";
 
@@ -113,6 +114,43 @@ export const BACS: Record<BacId, BacContent> = {
     picto: "plante-barree",
     forme: "panneau",
   },
+  // --- Forêt des Découvertes ---
+  foret: { id: "foret", nom: "Forêt", couleur: "#237A44", couleurFoncee: "#175A31", picto: "arbre", forme: "panneau" },
+  savane: { id: "savane", nom: "Savane", couleur: "#C98A0E", couleurFoncee: "#8F610A", picto: "herbe", forme: "panneau" },
+  eau: { id: "eau", nom: "Rivière et lagune", couleur: "#1A6FA8", couleurFoncee: "#114F7A", picto: "vague", forme: "panneau" },
+  jardin: { id: "jardin", nom: "Jardin", couleur: "#B4407A", couleurFoncee: "#842C59", picto: "fleur", forme: "panneau" },
+  "protege-nature": {
+    id: "protege-nature",
+    nom: "Protège la nature",
+    couleur: "#237A44",
+    couleurFoncee: "#175A31",
+    picto: "coeur",
+    forme: "panneau",
+  },
+  "abime-nature": {
+    id: "abime-nature",
+    nom: "Abîme la nature",
+    couleur: "#C9432C",
+    couleurFoncee: "#9E3220",
+    picto: "coeur-brise",
+    forme: "panneau",
+  },
+  "habitat-sain": {
+    id: "habitat-sain",
+    nom: "Bon pour les animaux",
+    couleur: "#237A44",
+    couleurFoncee: "#175A31",
+    picto: "maison",
+    forme: "panneau",
+  },
+  "habitat-danger": {
+    id: "habitat-danger",
+    nom: "Danger pour les animaux",
+    couleur: "#C9432C",
+    couleurFoncee: "#9E3220",
+    picto: "danger",
+    forme: "panneau",
+  },
 };
 
 export const COMPETENCES: Record<CompetenceId, { nom: string; emoji: string }> = {
@@ -125,6 +163,9 @@ export const COMPETENCES: Record<CompetenceId, { nom: string; emoji: string }> =
   "economiser-eau": { nom: "Je reconnais les gestes qui économisent l'eau", emoji: "🚰" },
   "proteger-eau": { nom: "Je sais comment protéger la rivière", emoji: "🐟" },
   "reutiliser-eau": { nom: "Je sais quelle eau peut arroser les plantes", emoji: "🌱" },
+  "connaitre-habitats": { nom: "Je sais où vivent les animaux de chez nous", emoji: "🐘" },
+  "respecter-nature": { nom: "J'observe la nature sans l'abîmer", emoji: "🔍" },
+  "proteger-habitats": { nom: "Je repère ce qui met les animaux en danger", emoji: "🐢" },
 };
 
 /** Nombre de bonnes réponses du premier coup pour qu'une compétence soit démontrée. */
@@ -681,10 +722,10 @@ const VILLAGE_DEFIS: DefiReelContent[] = [
 ];
 
 /** Tous les défis du vrai monde, toutes zones confondues. */
-export const DEFIS_REELS: DefiReelContent[] = [...VILLAGE_DEFIS, ...RIVIERE_DEFIS];
+export const DEFIS_REELS: DefiReelContent[] = [...VILLAGE_DEFIS, ...RIVIERE_DEFIS, ...FORET_DEFIS];
 
 /** Toutes les missions jouables, toutes zones confondues. */
-export const MISSIONS: MissionContent[] = [...VILLAGE_MISSIONS, ...RIVIERE_MISSIONS];
+export const MISSIONS: MissionContent[] = [...VILLAGE_MISSIONS, ...RIVIERE_MISSIONS, ...FORET_MISSIONS];
 
 export const DEFI_BY_ID = Object.fromEntries(DEFIS_REELS.map((d) => [d.id, d])) as Record<
   string,
