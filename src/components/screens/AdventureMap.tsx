@@ -6,7 +6,7 @@ import { PinBadge } from "@/components/art/PinBadge";
 import { MAP_POSITIONS, MAP_VIEWBOX, MapScene } from "@/components/art/Scenes";
 import { IconCheck, IconLock, IconPlay, IconStar } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
-import { Avatar, Btn, CharacterMedallion, Mascot, ProgressBar, Sheet, SpeechBubble } from "@/components/ui";
+import { Avatar, Btn, CharacterMedallion, DecorFond, DECORS, Illustration, Mascot, ProgressBar, Sheet, SpeechBubble } from "@/components/ui";
 import { THEME_BY_ID } from "@/content/curriculum";
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import type { ZoneContent } from "@/content/types";
@@ -63,7 +63,13 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
         <div className="grid min-w-0 gap-5">
           {/* Bannière */}
-          <section className="hero-ng relative overflow-hidden rounded-[2rem] p-5 sm:p-7">
+          <section className="relative overflow-hidden rounded-[2rem] p-5 shadow-[0_10px_28px_rgba(26,79,122,0.12)] sm:p-7">
+            <DecorFond
+              src={DECORS.accueil}
+              position="70% 60%"
+              voile="from-white/90 via-white/60 to-white/0"
+              priorite
+            />
             <div className="relative z-10 max-w-[64%] sm:max-w-[58%]">
               <h1 className="font-display text-3xl leading-tight sm:text-4xl lg:text-5xl">
                 Bonjour,
@@ -80,8 +86,8 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
               </div>
             </div>
             <div className="pointer-events-none absolute bottom-0 right-1 flex items-end sm:right-6">
-              <Mascot id="awa" size={130} className="hidden sm:block" />
-              <Mascot id="kofi" size={150} className="sm:-ml-6" />
+              <Mascot id="awa" pose="explique" size={150} float={false} className="hidden sm:block" />
+              <Mascot id="kofi" pose="montre" size={165} float={false} className="sm:-ml-4" />
             </div>
           </section>
 
@@ -117,18 +123,22 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                     key={zone.id}
                     type="button"
                     onClick={() => ouvrirZone(zone)}
-                    className="flex min-h-[112px] flex-col items-start gap-2 rounded-3xl p-4 text-left transition-transform hover:-translate-y-0.5"
-                    style={{ background: `${zone.couleur}1A` }}
+                    className="relative flex min-h-[150px] flex-col items-start justify-end gap-1 overflow-hidden rounded-3xl p-3 text-left shadow-[0_6px_18px_rgba(26,79,122,0.10)] transition-transform hover:-translate-y-0.5"
                     aria-label={ouverte ? `${zone.nom} : ${prog.terminees} missions sur ${prog.total}` : `${zone.nom} : bientôt`}
                   >
+                    <DecorFond
+                      src={zone.decor}
+                      voile={ouverte ? "from-black/0 to-black/0" : "from-white/45 to-white/45"}
+                    />
+                    <span className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/65 to-transparent" aria-hidden />
                     <span
-                      className="flex h-12 w-12 items-center justify-center rounded-2xl text-2xl text-white shadow-sm"
-                      style={{ background: ouverte ? zone.couleur : "#BDB3A6" }}
+                      className="relative flex h-10 w-10 items-center justify-center rounded-2xl text-xl text-white shadow-sm"
+                      style={{ background: ouverte ? zone.couleur : "#8F857A" }}
                     >
-                      {ouverte ? THEME_BY_ID[zone.pilier].icone : <IconLock size={24} />}
+                      {ouverte ? THEME_BY_ID[zone.pilier].icone : <IconLock size={20} />}
                     </span>
-                    <span className="font-display text-lg leading-tight">{NOMS_COURTS[zone.pilier]}</span>
-                    <span className="text-sm font-bold text-ng-muted">
+                    <span className="relative font-display text-lg leading-tight text-white">{NOMS_COURTS[zone.pilier]}</span>
+                    <span className="relative text-sm font-bold text-white/90">
                       {ouverte ? `${prog.terminees}/${prog.total} missions` : "Bientôt"}
                     </span>
                   </button>
@@ -201,8 +211,9 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
 
       {bientot ? (
         <Sheet label={bientot.nom} onClose={() => setBientot(null)}>
+          <Illustration src={bientot.decor} ratio="16 / 9" className="mb-4 rounded-3xl" />
           <div className="flex items-center gap-3">
-            <Mascot id="awa" size={110} />
+            <Mascot id="awa" pose="explique" size={110} />
             <div>
               <h2 className="font-display text-2xl leading-tight">{bientot.nom}</h2>
               <p className="mt-1 font-bold text-ng-muted">{bientot.accroche}</p>
@@ -241,8 +252,13 @@ function ContinuerCarte({ save, missionId, onPlay }: { save: Sauvegarde; mission
   const perso = SECONDARY_CHARACTERS[mission.personnageId];
   const pct = Math.round((prog.terminees / Math.max(1, prog.total)) * 100);
   return (
-    <div className="card-ng flex flex-wrap items-center gap-4 p-4 sm:flex-nowrap" data-mission={missionId}>
-      <CharacterMedallion id={mission.personnageId} size={72} />
+    <div className="card-ng flex flex-wrap items-center gap-4 p-3 sm:flex-nowrap sm:p-4" data-mission={missionId}>
+      <div className="relative w-full shrink-0 sm:w-48">
+        <Illustration src={mission.vignette} ratio="16 / 10" className="rounded-2xl" />
+        <div className="absolute -bottom-3 -right-2">
+          <CharacterMedallion id={mission.personnageId} size={52} />
+        </div>
+      </div>
       <div className="min-w-0 flex-1">
         <p className="font-display text-base text-ng-muted">
           {zone.nom} · Mission {mission.ordre}

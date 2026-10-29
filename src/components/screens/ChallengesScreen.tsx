@@ -43,7 +43,7 @@ export function ChallengesScreen({ save, naviguer }: { save: Sauvegarde; navigue
     <main className="mx-auto w-full max-w-3xl px-4 pt-2 lg:max-w-5xl lg:px-8 lg:pt-8">
       <h1 className="font-display text-3xl">Mes défis du vrai monde</h1>
       <div className="mt-2 flex items-center gap-2">
-        <Mascot id="kofi" size={80} />
+        <Mascot id="kofi" pose="montre" size={96} />
         <div className="flex-1">
           <SpeechBubble qui="Kofi" size="sm" texteVoix={message}>
             <p>{message}</p>

@@ -201,6 +201,7 @@ export const VILLAGE_MISSIONS: MissionContent[] = [
         "Les épluchures pourrissent et deviennent un engrais naturel : le compost nourrit les plantes.",
     },
     defiId: "expliquer-tri",
+    vignette: "/illustrations/missions/marche-adjoua.webp",
   },
   {
     id: "cour-ecole",
@@ -326,6 +327,7 @@ export const VILLAGE_MISSIONS: MissionContent[] = [
         "Dans une usine de recyclage, le verre est fondu puis moulé pour faire de nouvelles bouteilles.",
     },
     defiId: "ranger-espace",
+    vignette: "/illustrations/missions/cour-ecole.webp",
   },
   {
     id: "seconde-vie",
@@ -448,6 +450,7 @@ export const VILLAGE_MISSIONS: MissionContent[] = [
         "Réutiliser, c'est faire servir un objet encore une fois. Il ne devient pas un déchet tout de suite.",
     },
     defiId: "seconde-vie-maison",
+    vignette: "/illustrations/missions/seconde-vie.webp",
   },
   {
     id: "objets-dangereux",
@@ -563,6 +566,7 @@ export const VILLAGE_MISSIONS: MissionContent[] = [
         "Une pile peut couler et polluer. L'adulte la rapporte dans un point de collecte.",
     },
     defiId: "piles-maison",
+    vignette: "/illustrations/missions/objets-dangereux.webp",
   },
 ];
 

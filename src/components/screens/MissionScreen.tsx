@@ -10,6 +10,7 @@ import {
   Btn,
   CharacterMedallion,
   Confetti,
+  Illustration,
   Mascot,
   ProgressBar,
   Sheet,
@@ -111,6 +112,7 @@ export function MissionScreen({
           personnage={mission.personnageId}
           nomPerso={perso?.nom ?? ""}
           bacs={mission.bacs[complexite].map((b) => BACS[b].nom)}
+          vignette={mission.vignette}
           onPlay={() => setPhase("jeu")}
         />
       ) : null}
@@ -167,7 +169,7 @@ export function MissionScreen({
       {quitter ? (
         <Sheet label="Quitter la mission ?" onClose={() => setQuitter(false)}>
           <div className="flex items-center gap-3">
-            <Mascot id="kofi" size={100} />
+            <Mascot id="kofi" pose="reflechit" size={110} />
             <h2 className="font-display text-2xl leading-tight">Tu veux t&apos;arrêter là ?</h2>
           </div>
           <p className="mt-3 font-bold text-ng-muted">
@@ -193,8 +195,10 @@ function Intro({
   personnage,
   nomPerso,
   bacs,
+  vignette,
   onPlay,
 }: {
+  vignette: string;
   titre: string;
   histoire: string;
   personnage: string;
@@ -205,10 +209,15 @@ function Intro({
   useDireAuMontage(histoire);
   return (
     <section className="anim-rise flex min-h-[calc(100dvh-100px)] flex-col">
-      <h1 className="text-center font-display text-3xl leading-tight">{titre}</h1>
-      <div className="mt-4 flex items-center justify-center gap-3">
+      <div className="relative overflow-hidden rounded-[2rem] shadow-lg">
+        <Illustration src={vignette} ratio="16 / 9" />
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ng-ink/70 to-transparent px-4 pb-3 pt-10">
+          <h1 className="font-display text-2xl leading-tight text-white sm:text-3xl">{titre}</h1>
+        </div>
+      </div>
+      <div className="-mt-6 flex items-end justify-between gap-3 px-2">
         <CharacterMedallion id={personnage} size={84} />
-        <Mascot id="kofi" size={150} />
+        <Mascot id="kofi" pose="montre" size={130} />
       </div>
       <div className="mt-4">
         <SpeechBubble qui={nomPerso} texteVoix={histoire}>
@@ -263,7 +272,7 @@ function Question({
   return (
     <section className="anim-rise">
       <div className="flex items-center gap-3">
-        <Mascot id="awa" size={96} />
+        <Mascot id="awa" pose="explique" size={110} />
         <div className="flex-1">
           <SpeechBubble qui="La question d'Awa" color="#7A4BC0" texteVoix={question.question}>
             <p>{question.question}</p>
@@ -433,7 +442,7 @@ function DefiPropose({
   useDireAuMontage(`Défi du vrai monde. ${consigne}`);
   return (
     <section className="anim-rise flex flex-col items-center text-center">
-      <Mascot id="awa" size={150} />
+      <Mascot id="awa" pose="explique" size={170} />
       <p className="mt-2 rounded-full bg-ng-green px-4 py-1 font-display text-base text-white">Défi du vrai monde</p>
       <h1 className="mt-2 font-display text-3xl leading-tight">
         <span aria-hidden>{defi.emoji} </span>

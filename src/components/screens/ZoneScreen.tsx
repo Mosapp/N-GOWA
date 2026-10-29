@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 
-import { VillageScene } from "@/components/art/Scenes";
 import { IconCheck, IconLock, IconPlay } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
-import { Btn, CharacterMedallion, ScreenHeader, Sheet, SpeechBubble, Stars } from "@/components/ui";
+import { Btn, CharacterMedallion, Illustration, ScreenHeader, Sheet, SpeechBubble, Stars } from "@/components/ui";
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import type { MissionContent, ZoneId } from "@/content/types";
 import { ZONE_BY_ID } from "@/content/zones";
@@ -38,7 +37,7 @@ export function ZoneScreen({
       <div className="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-4">
       <div className="lg:sticky lg:top-6">
         <div className="overflow-hidden rounded-b-[2rem] shadow-[0_6px_0_rgba(45,42,38,0.06)] sm:mx-4 sm:rounded-[2rem] lg:mx-0">
-          <VillageScene />
+          <Illustration src={zone.decor} alt={zone.nom} ratio="16 / 9" />
         </div>
         <p className="px-5 pt-3 text-center font-bold text-ng-muted">
           {zone.accroche} · {pointsZone(save, zoneId)} points ici
@@ -153,6 +152,7 @@ function MissionSheet({
 
   return (
     <Sheet label={mission.titre} onClose={onClose}>
+      <Illustration src={mission.vignette} ratio="16 / 9" className="mb-4 rounded-3xl" />
       <div className="flex items-center gap-3">
         <CharacterMedallion id={mission.personnageId} size={72} />
         <div>

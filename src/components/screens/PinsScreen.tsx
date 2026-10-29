@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { PinBadge } from "@/components/art/PinBadge";
-import { Btn, Confetti, Mascot, ProgressBar, Sheet, SpeechBubble } from "@/components/ui";
+import { Btn, Confetti, DECORS, Illustration, ProgressBar, Sheet, SpeechBubble } from "@/components/ui";
 import { PIN_BY_ID, PINS } from "@/content/pins";
 import type { PinContent } from "@/content/types";
 import { progressionPin } from "@/lib/game/rules";
@@ -30,7 +30,7 @@ export function PinsScreen({ save }: { save: Sauvegarde }) {
     <main className="mx-auto w-full max-w-3xl px-4 pt-2 lg:max-w-5xl lg:px-8 lg:pt-8">
       <h1 className="font-display text-3xl">Mes pins</h1>
       <div className="mt-2 flex items-center gap-2">
-        <Mascot id="awa" size={80} />
+        <Illustration src={DECORS.coffre} ratio="1 / 1" className="w-24 shrink-0 rounded-3xl sm:w-28" />
         <div className="flex-1">
           <SpeechBubble qui="Awa" color="#7A4BC0" size="sm" texteVoix={message}>
             <p>{message}</p>

@@ -172,6 +172,11 @@ try {
   await page.reload();
   await page.getByRole("button", { name: "Continuer l'aventure" }).click();
   ok(await page.getByRole("button", { name: /1 missions sur 4 terminées/ }).isVisible(), "l'application se recharge sans connexion");
+  await page.waitForTimeout(800);
+  const imagesCassees = await page.evaluate(() =>
+    [...document.images].filter((img) => img.complete && img.naturalWidth === 0 && img.loading !== "lazy").map((img) => img.src),
+  );
+  ok(imagesCassees.length === 0, `illustrations affichées hors ligne (${imagesCassees.join(", ")})`);
   await lancerMission(page, 2);
   ok((await page.getByRole("button", { name: /^Mettre « / }).count()) === 4, "mission 2 hors ligne : quatre bacs");
   await jouerTri(page, { glisser: false });

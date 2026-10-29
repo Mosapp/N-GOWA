@@ -19,18 +19,21 @@ const TRANCHES: { id: TrancheAge; titre: string; sousTitre: string; emoji: strin
 const DECOUVERTE = [
   {
     mascotte: "kofi" as const,
+    pose: "montre" as const,
     titre: "Explore la carte",
     texte: "Quatre zones à découvrir ! On commence par le Village du Tri.",
     emoji: "🗺️",
   },
   {
     mascotte: "awa" as const,
+    pose: "explique" as const,
     titre: "Joue et apprends",
     texte: "Chaque mission est un petit jeu. Tu gagnes des points et de beaux pins.",
     emoji: "🏅",
   },
   {
     mascotte: "kofi" as const,
+    pose: "bravo" as const,
     titre: "Agis pour de vrai",
     texte: "Après le jeu, relève un défi à la maison. Un adulte pourra le valider.",
     emoji: "🌱",
@@ -221,7 +224,7 @@ export function Onboarding({
             </SpeechBubble>
           </div>
           <div className="flex flex-1 items-end justify-center pt-4">
-            <Mascot id={DECOUVERTE[slide].mascotte} size={200} />
+            <Mascot id={DECOUVERTE[slide].mascotte} pose={DECOUVERTE[slide].pose} size={220} />
           </div>
           <div className="mt-3 flex justify-center gap-2" aria-hidden>
             {DECOUVERTE.map((_, i) => (
