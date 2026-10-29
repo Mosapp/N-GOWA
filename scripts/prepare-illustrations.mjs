@@ -1,6 +1,6 @@
 // Prépare les illustrations N'GOWA pour le web (téléphones modestes compris).
 //
-// Usage : node scripts/prepare-illustrations.mjs <dossier-des-sources>
+// Usage : node scripts/prepare-illustrations.mjs <dossier-des-sources>[,<autre-dossier>]
 //
 // - Personnages : le fond uni (blanc ou crème) est détouré par remplissage
 //   depuis les bords, puis l'image est recadrée et convertie en WebP transparent.
@@ -46,17 +46,22 @@ const DECORS = [
   ["Boy_resting_against_tree_", "decors/kofi-repos", 800],
   ["Young_girl_waving_hello_", "decors/awa-au-revoir", 800],
   ["Wooden_treasure_chest_glowing_", "decors/coffre", 800],
+  // Carte de l'aventure (2ᵉ lot d'images)
+  ["Illustrated_adventure_map_of_reg#U2026_bbabcc45", "decors/carte-portrait", 896],
+  ["Illustrated_adventure_map_with_path_71e7b0ff", "decors/carte-paysage", 1376],
   ["Sorting_trash_at_market_", "missions/marche-adjoua", 960],
   ["Children_sorting_waste_in_courtyard_", "missions/cour-ecole", 960],
   ["Seamstress_repurposing_items_in_", "missions/seconde-vie", 960],
   ["Returning_used_batteries_and_med", "missions/objets-dangereux", 960],
 ];
 
-const fichiers = fs.readdirSync(SOURCE);
+// Plusieurs dossiers sources possibles (un par lot d'images), séparés par des virgules.
+const DOSSIERS = SOURCE.split(",");
+const fichiers = DOSSIERS.flatMap((d) => fs.readdirSync(d).map((f) => path.join(d, f)));
 const trouver = (prefixe) => {
-  const f = fichiers.find((x) => x.startsWith(prefixe));
+  const f = fichiers.find((x) => path.basename(x).startsWith(prefixe));
   if (!f) throw new Error(`Image introuvable : ${prefixe}*`);
-  return path.join(SOURCE, f);
+  return f;
 };
 
 /** Détoure le fond uni connecté aux bords de l'image. */

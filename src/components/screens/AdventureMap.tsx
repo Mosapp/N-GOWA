@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { PinBadge } from "@/components/art/PinBadge";
-import { MAP_POSITIONS, MAP_VIEWBOX, MapScene } from "@/components/art/Scenes";
+import { CarteAventure } from "@/components/screens/CarteAventure";
 import { IconCheck, IconLock, IconPlay, IconStar } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
 import { Avatar, Btn, CharacterMedallion, DecorFond, DECORS, Illustration, Mascot, ProgressBar, Sheet, SpeechBubble } from "@/components/ui";
@@ -109,6 +109,13 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
             )}
           </section>
 
+          <section>
+            <h2 className="mb-2 font-display text-2xl">La carte de l&apos;aventure</h2>
+            <div className="mx-auto max-w-[560px] lg:max-w-none">
+              <CarteAventure save={save} zoneActuelle={prochaine?.zoneId ?? "village-tri"} onZone={ouvrirZone} />
+            </div>
+          </section>
+
           {/* Sur téléphone et tablette portrait, les encarts viennent ici. */}
           <div className="grid gap-4 sm:grid-cols-2 lg:hidden">{encarts}</div>
 
@@ -151,67 +158,6 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
           </section>
 
           {/* Carte */}
-          <section>
-            <h2 className="mb-2 font-display text-2xl">La carte de l&apos;aventure</h2>
-            <div className="card-ng mx-auto max-w-[540px] overflow-hidden p-0">
-              <div className="relative">
-                <MapScene />
-                {ZONES.map((zone) => {
-                  const pos = MAP_POSITIONS[zone.id];
-                  const statutZ = statutZone(save, zone.id);
-                  const ouverte = statutZ === "ouverte";
-                  const prog = progressionZone(save, zone.id);
-                  const ici = (prochaine?.zoneId ?? "village-tri") === zone.id;
-                  return (
-                    <div
-                      key={zone.id}
-                      className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-                      style={{ left: `${(pos.x / MAP_VIEWBOX.w) * 100}%`, top: `${(pos.y / MAP_VIEWBOX.h) * 100}%` }}
-                    >
-                      {ici ? (
-                        <div className="anim-float absolute -top-14" aria-hidden>
-                          <Avatar id={profil.avatar} size={48} />
-                        </div>
-                      ) : null}
-                      <button
-                        type="button"
-                        onClick={() => ouvrirZone(zone)}
-                        className="flex flex-col items-center"
-                        aria-label={
-                          ouverte
-                            ? `${zone.nom} : ${prog.terminees} missions sur ${prog.total} terminées`
-                            : statutZ === "verrouillee"
-                              ? `${zone.nom} : à débloquer`
-                              : `${zone.nom} : bientôt disponible`
-                        }
-                      >
-                        <span
-                          className={`flex h-[76px] w-[76px] items-center justify-center rounded-full border-[5px] border-white text-4xl shadow-[0_6px_0_rgba(45,42,38,0.18)] ${
-                            ouverte ? "anim-glow" : ""
-                          }`}
-                          style={{ background: ouverte ? zone.couleur : "#CFC6B9" }}
-                        >
-                          {ouverte ? THEME_BY_ID[zone.pilier].icone : <IconLock size={34} className="text-white" />}
-                        </span>
-                        <span className="mt-1 max-w-[150px] rounded-2xl bg-white/95 px-3 py-1 text-center shadow-sm">
-                          <span className="block font-display text-base leading-tight">{zone.nom}</span>
-                          {ouverte ? (
-                            <span className="flex items-center justify-center gap-1 font-display text-sm text-ng-muted">
-                              <IconStar size={16} /> {prog.etoiles}/{prog.etoilesMax} · {prog.terminees}/{prog.total}
-                            </span>
-                          ) : (
-                            <span className="block font-display text-sm text-ng-muted">
-                              {statutZ === "verrouillee" ? "À débloquer" : "Bientôt"}
-                            </span>
-                          )}
-                        </span>
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
         </div>
 
         {/* Grand écran : colonne de droite */}

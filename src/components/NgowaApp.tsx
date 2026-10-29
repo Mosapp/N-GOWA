@@ -21,6 +21,7 @@ import {
   normaliserTemps,
   statutTemps,
 } from "@/lib/game/screenTime";
+import { synchroniserPins } from "@/lib/game/rules";
 import { modifierSauvegarde, useMaintenant, useSauvegarde } from "@/lib/game/store";
 
 const PAS_TEMPS_SEC = 5;
@@ -91,6 +92,14 @@ export function NgowaApp() {
       .catch(() => {
         /* le jeu reste utilisable en ligne */
       });
+  }, []);
+
+  /* ------------------------------ pins à jour ----------------------------- */
+
+  // Si les règles des pins ont changé (seuils ajustés), on les réévalue à
+  // l'ouverture : un pin déjà mérité est attribué sans attendre une mission.
+  useEffect(() => {
+    modifierSauvegarde((s) => (s.profil ? synchroniserPins(s, new Date().toISOString()).save : s));
   }, []);
 
   /* ----------------------------- temps d'écran ---------------------------- */

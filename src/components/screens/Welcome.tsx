@@ -1,6 +1,6 @@
 "use client";
 
-import { Emblem } from "@/components/art/Scenes";
+import { Emblem } from "@/components/art/Emblem";
 import { Btn, DecorFond, DECORS, Mascot, SpeechBubble } from "@/components/ui";
 import { warmUpAudio } from "@/lib/audio";
 
