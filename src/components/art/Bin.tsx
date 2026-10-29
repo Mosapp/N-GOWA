@@ -1,5 +1,64 @@
 import type { BacContent } from "@/content/types";
 
+/**
+ * Poubelles dessinées en deux pièces (corps + couvercle) : le couvercle
+ * bascule vers l'arrière quand on ouvre, puis retombe avec un petit rebond.
+ * Dimensions en px des images, `centre` = milieu de l'ouverture (fraction de
+ * la largeur), `bas` = où se pose le bas du couvercle (fraction de la hauteur).
+ */
+const POUBELLES: Partial<
+  Record<BacContent["id"], { corps: [number, number]; couvercle: [number, number]; centre: number; bas: number }>
+> = {
+  plastique: { corps: [260, 266], couvercle: [256, 120], centre: 0.502, bas: 0.21 },
+  papier: { corps: [260, 278], couvercle: [252, 116], centre: 0.496, bas: 0.21 },
+  verre: { corps: [260, 271], couvercle: [244, 130], centre: 0.5, bas: 0.25 },
+  restes: { corps: [260, 274], couvercle: [250, 146], centre: 0.498, bas: 0.27 },
+  danger: { corps: [260, 226], couvercle: [236, 115], centre: 0.527, bas: 0.2 },
+  reutiliser: { corps: [260, 222], couvercle: [250, 153], centre: 0.465, bas: 0.36 },
+  trier: { corps: [260, 273], couvercle: [252, 133], centre: 0.544, bas: 0.3 },
+};
+
+function PoubelleDessinee({ bac, ouvert, size }: { bac: BacContent; ouvert: boolean; size: number }) {
+  const p = POUBELLES[bac.id]!;
+  const echelle = (size * 0.92) / p.corps[0];
+  const [cw, ch] = [p.corps[0] * echelle, p.corps[1] * echelle];
+  const [lw, lh] = [p.couvercle[0] * echelle, p.couvercle[1] * echelle];
+  const dessus = Math.max(0, lh - p.bas * ch);
+  const hauteur = ch + dessus;
+  return (
+    <div className="relative mx-auto" style={{ width: size, height: Math.max(size * 1.1, hauteur) }} aria-hidden>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2" style={{ width: cw, height: hauteur }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- poubelle dessinée locale */}
+        <img
+          src={`/illustrations/poubelles/${bac.id}-corps.webp`}
+          alt=""
+          draggable={false}
+          className="absolute bottom-0 left-0"
+          style={{ width: cw, height: ch }}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element -- couvercle animé séparément */}
+        <img
+          src={`/illustrations/poubelles/${bac.id}-couvercle.webp`}
+          alt=""
+          draggable={false}
+          className="absolute"
+          style={{
+            width: lw,
+            height: lh,
+            left: p.centre * cw - lw / 2,
+            top: dessus + p.bas * ch - lh,
+            transformOrigin: "88% 100%",
+            transform: ouvert ? "translate(-4%, -46%) rotate(-26deg)" : "none",
+            transition: ouvert
+              ? "transform 160ms ease-out"
+              : "transform 320ms cubic-bezier(0.34, 1.7, 0.64, 1)",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** Bac de tri illustré : couleur + pictogramme (la couleur n'est jamais le seul repère). */
 export function Bin({
   bac,
@@ -11,6 +70,7 @@ export function Bin({
   size?: number;
 }) {
   if (bac.forme === "panneau") return <Panneau bac={bac} ouvert={ouvert} size={size} />;
+  if (POUBELLES[bac.id]) return <PoubelleDessinee bac={bac} ouvert={ouvert} size={size} />;
   return (
     <svg
       width={size}

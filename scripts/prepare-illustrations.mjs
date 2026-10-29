@@ -108,6 +108,19 @@ const PLANCHES = [
   ]],
 ];
 
+// Poubelles en deux pièces (corps à gauche, couvercle à droite) : le
+// couvercle est animé séparément pour s'ouvrir puis se refermer.
+const POUBELLES = [
+  ["Recycling_bin_parts_side_by_f275919d", "plastique"],
+  ["Recycling_bin_parts_side_by_10e01fee", "papier"],
+  ["Recycling_bin_parts_side_by_3fd86835", "verre"],
+  ["Compost_bin_and_lid_parts_8d9e0a8f", "restes"],
+  ["Red_safety_box_components_8bd5d8c2", "danger"],
+  ["Purple_wooden_storage_chest_parts_8d26b1a5", "reutiliser", 0.28],
+  // Poubelle grise : seule l'ombre très claire part, pas le gris du corps.
+  ["Sorting_bin_and_lid_parts_93fc75f2", "trier", 0.16, 185],
+];
+
 // Plusieurs dossiers sources possibles (un par lot d'images), séparés par des virgules.
 const DOSSIERS = SOURCE.split(",");
 const fichiers = DOSSIERS.flatMap((d) => fs.readdirSync(d).map((f) => path.join(d, f)));
@@ -203,7 +216,7 @@ function morpho(masque, w, h, r, dilater) {
  * ouvertures du contour, on remplit les trous (plastique, papier clair…),
  * puis l'ombre grise posée sur le blanc devient une ombre transparente.
  */
-async function detourerObjet(entree) {
+async function detourerObjet(entree, { sansOmbre = false, saturation = 0.16, clarte = 110 } = {}) {
   const { data, info } = await sharp(entree).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: w, height: h } = info;
   const n = w * h;
@@ -241,8 +254,10 @@ async function detourerObjet(entree) {
       const i = v * 4;
       const max = Math.max(data[i], data[i + 1], data[i + 2]);
       const min = Math.min(data[i], data[i + 1], data[i + 2]);
-      const gris = max > 0 && (max - min) / max < 0.07 && max >= 165;
-      if (!gris || profondeur[k] >= 22) continue;
+      const gris = sansOmbre
+        ? max > 0 && (max - min) / max < saturation && max >= clarte
+        : max > 0 && (max - min) / max < 0.07 && max >= 165;
+      if (!gris || (!sansOmbre && profondeur[k] >= 22)) continue;
       profondeur[v] = profondeur[k] + 1;
       file.push(v);
     }
@@ -250,6 +265,7 @@ async function detourerObjet(entree) {
   for (let k = 0; k < n; k += 1) {
     const i = k * 4;
     if (!objet[k]) data[i + 3] = 0;
+    else if (profondeur[k] > 0 && sansOmbre) data[i + 3] = 0;
     else if (profondeur[k] > 0) {
       const opacite = Math.min(130, Math.round((255 - Math.max(data[i], data[i + 1], data[i + 2])) * 2.4));
       data[i] = 45;
@@ -268,6 +284,7 @@ fs.mkdirSync(path.join(SORTIE, "missions"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "avatars"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "scenes"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "objets"), { recursive: true });
+fs.mkdirSync(path.join(SORTIE, "poubelles"), { recursive: true });
 
 const dimensions = {};
 
@@ -311,6 +328,58 @@ for (const [prefixe, ids] of PLANCHES) {
       .toFile(path.join(SORTIE, `objets/${id}.webp`));
     console.log(`✓ objets/${id}.webp ${resultat.width}×${resultat.height} ${(resultat.size / 1024).toFixed(0)} Ko`);
   }
+}
+
+// Poubelles : on sépare le corps et le couvercle là où une bande verticale
+// vide les écarte, puis on garde la même échelle pour les deux pièces.
+const piecesPoubelles = {};
+for (const [prefixe, id, saturation = 0.16, clarte = 110] of POUBELLES) {
+  const detoure = await detourerObjet(trouver(prefixe), { sansOmbre: true, saturation, clarte });
+  const { data, info } = await sharp(detoure).raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  // Colonne la moins remplie entre les deux pièces (un reflet coloré au sol
+  // peut les relier : on coupe là où il y a le moins de matière).
+  const remplissage = (x) => {
+    let n = 0;
+    for (let y = 0; y < h; y += 1) if (data[(y * w + x) * 4 + 3] > 150) n += 1;
+    return n;
+  };
+  let meilleur = null;
+  for (let x = Math.floor(w * 0.3), debut = -1, min = Infinity; x < w * 0.75; x += 1) {
+    const n = remplissage(x);
+    if (n < min) {
+      min = n;
+      debut = x;
+      meilleur = [x, x];
+    } else if (n === min && debut >= 0 && meilleur[1] === x - 1) meilleur[1] = x;
+  }
+  const coupe = Math.round((meilleur[0] + meilleur[1]) / 2);
+  const corps = await sharp(detoure).extract({ left: 0, top: 0, width: coupe, height: h }).png().toBuffer();
+  const couvercle = await sharp(detoure).extract({ left: coupe, top: 0, width: w - coupe, height: h }).png().toBuffer();
+  // Rogne sur l'opacité forte pour que l'ombre ne fausse pas l'alignement.
+  const cadre = async (buf) => {
+    const { data: d, info: i } = await sharp(buf).raw().toBuffer({ resolveWithObject: true });
+    let [x0, y0, x1, y1] = [i.width, i.height, 0, 0];
+    for (let y = 0; y < i.height; y += 1)
+      for (let x = 0; x < i.width; x += 1)
+        if (d[(y * i.width + x) * 4 + 3] > 200) {
+          x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+        }
+    return { left: x0, top: y0, width: x1 - x0 + 1, height: y1 - y0 + 1 };
+  };
+  const cc = await cadre(corps);
+  const cv = await cadre(couvercle);
+  const echelle = 260 / cc.width;
+  const sauver = async (buf, zone, nom) => {
+    const r = await sharp(buf)
+      .extract(zone)
+      .resize({ width: Math.round(zone.width * echelle) })
+      .webp({ quality: 84, alphaQuality: 90 })
+      .toFile(path.join(SORTIE, `poubelles/${id}-${nom}.webp`));
+    return [r.width, r.height];
+  };
+  piecesPoubelles[id] = { corps: await sauver(corps, cc, "corps"), couvercle: await sauver(couvercle, cv, "couvercle") };
+  console.log(`✓ poubelles/${id} corps ${piecesPoubelles[id].corps.join("×")} couvercle ${piecesPoubelles[id].couvercle.join("×")}`);
 }
 
 // Avatars de Kofi et Awa : visage recadré depuis leur pose « salue », sur

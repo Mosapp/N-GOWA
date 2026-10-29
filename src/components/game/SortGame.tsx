@@ -116,10 +116,12 @@ export function SortGame({
   }, [retour]);
   useEffect(() => {
     if (!gain) return;
+    // Le couvercle reste ouvert le temps que le déchet tombe, puis se referme.
     const t = window.setTimeout(() => {
       setGain(null);
       setOuvert(null);
-    }, 900);
+      playTone("clac");
+    }, 750);
     return () => window.clearTimeout(t);
   }, [gain]);
 
@@ -420,7 +422,7 @@ export function SortGame({
 
         {/* Les poubelles, debout sur le sol devant la scène */}
         <div
-          className="absolute inset-x-2 bottom-2 z-[15] grid gap-1"
+          className="absolute inset-x-2 bottom-2 z-[35] grid gap-1"
           style={{ gridTemplateColumns: `repeat(${bacs.length}, minmax(0, 1fr))` }}
         >
         {bacs.map((id) => {
@@ -446,7 +448,11 @@ export function SortGame({
                   className="absolute bottom-0 left-1/2 h-3 w-[90%] -translate-x-1/2 translate-y-1/2 rounded-[50%] bg-black/30 blur-[3px]"
                   aria-hidden
                 />
-                <span className="relative block" style={{ filter: actif ? "drop-shadow(0 0 8px rgba(255,255,255,0.95))" : undefined }}>
+                <span
+                  key={gain?.bac === id ? gain.cle : "repos"}
+                  className={`relative block ${gain?.bac === id ? "anim-gobe" : ""}`}
+                  style={{ filter: actif ? "drop-shadow(0 0 8px rgba(255,255,255,0.95))" : undefined }}
+                >
                   <Bin bac={bac} ouvert={actif || ouvert === id} size={tailleBac} />
                 </span>
               </span>
