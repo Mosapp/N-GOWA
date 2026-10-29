@@ -81,6 +81,19 @@ export function SortGame({
   const compteur = useRef(0);
 
   const objetRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const [dims, setDims] = useState<{ w: number; h: number } | null>(null);
+
+  // La taille des objets suit la scène (et non l'écran) : ils restent dedans.
+  useEffect(() => {
+    const el = sceneRef.current;
+    if (!el) return;
+    const mesurer = () => setDims({ w: el.clientWidth, h: el.clientHeight });
+    mesurer();
+    const obs = new ResizeObserver(mesurer);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const bacRefs = useRef<Partial<Record<BacId, HTMLButtonElement | null>>>({});
   const glisse = useRef<{ x: number; y: number; id: number; objetId: string; bouge: boolean } | null>(null);
 
@@ -247,14 +260,20 @@ export function SortGame({
 
   const grand = complexite === "grand";
   const tailleBac = bacs.length >= 4 ? 70 : bacs.length === 3 ? 84 : 96;
-  // Plus gros sur tablette et PC, sans gêner les petits écrans.
-  const base = objets.length > 6 ? 64 : 72;
-  const tailleObjet = `clamp(${base}px, 11vw, ${Math.round(base * 1.3)}px)`;
-  // Objets dessinés : plus grands, et un peu plus petits au loin (perspective).
-  const tailleDessin = (y: number) => {
-    const p = 0.78 + ((y - 58) / 28) * 0.3;
-    return `clamp(${Math.round(84 * p)}px, ${(19 * p).toFixed(1)}vw, ${Math.round(124 * p)}px)`;
+  const w = dims?.w ?? 340;
+  const h = dims?.h ?? 420;
+  const borne = (v: number, min: number, max: number) => Math.round(Math.min(max, Math.max(min, v)));
+  /** Taille en px d'un objet selon la scène ; les objets dessinés rapetissent au loin. */
+  const taille = (o: ObjetATrier, y: number) => {
+    if (!o.image) return borne(Math.min(w * 0.17, h * 0.17), 52, objets.length > 6 ? 84 : 94);
+    const perspective = 0.78 + ((y - 58) / 28) * 0.3;
+    return borne(Math.min(w * 0.22, h * 0.2) * perspective, 50, 130);
   };
+  /** Position en px du centre de l'objet, toujours entièrement dans la scène. */
+  const centre = (x: number, y: number, t: number) => ({
+    left: borne((x / 100) * w, t / 2 + 6, w - t / 2 - 6),
+    top: borne((y / 100) * h, t / 2 + 6, h - t / 2 - 8),
+  });
 
   return (
     <div className="flex min-h-[calc(100dvh-88px)] flex-col">
@@ -265,7 +284,7 @@ export function SortGame({
       </div>
 
       {/* Scène : les déchets traînent par terre */}
-      <div className="relative mt-3 min-h-[300px] flex-1">
+      <div ref={sceneRef} className="relative mt-3 min-h-[300px] flex-1">
         <div className="absolute inset-0 overflow-hidden rounded-[2rem] border-4 border-white shadow-[0_6px_0_rgba(45,42,38,0.1)]">
           {/* eslint-disable-next-line @next/next/no-img-element -- illustration locale de la mission */}
           <img src={scene} alt="" className="h-full w-full object-cover" draggable={false} />
@@ -285,11 +304,13 @@ export function SortGame({
           const envol = envols[o.id];
           const actif = objetChoisi?.id === o.id;
           const secoue = secousse?.id === o.id;
+          const t = taille(o, place.y);
+          const { left, top } = centre(place.x, place.y, t);
           return (
             <div
               key={o.id}
               className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${place.x}%`, top: `${place.y}%`, zIndex: tenu === o.id || envol ? 60 : 20 + Math.round(place.y / 4) }}
+              style={{ left, top, zIndex: tenu === o.id || envol ? 60 : 20 + Math.round(place.y / 4) }}
             >
               <div
                 className={o.image ? "" : actif || envol ? "" : "anim-float"}
@@ -329,7 +350,7 @@ export function SortGame({
                         }`
                   } ${secoue ? "anim-shake" : ""} cursor-grab active:cursor-grabbing`}
                   style={{
-                    fontSize: o.image ? tailleDessin(place.y) : tailleObjet,
+                    fontSize: t,
                     width: "1em",
                     height: "1em",
                     ...(envol
