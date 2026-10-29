@@ -205,8 +205,6 @@ export function WaterGame({ game, onFinish }: { game: EauData; onFinish: Finishe
   useEffect(() => {
     if (!scenario) return;
     speak(`${scenario.lieu}. ${scenario.situation}`);
-    setFill(0);
-    setMissed(false);
     const started = Date.now();
     const duration = 16000;
     const interval = window.setInterval(() => {
@@ -247,6 +245,8 @@ export function WaterGame({ game, onFinish }: { game: EauData; onFinish: Finishe
 
   const next = () => {
     setFeedback(null);
+    setFill(0);
+    setMissed(false);
     if (index + 1 >= total) onFinish(score.current, total);
     else setIndex(index + 1);
   };

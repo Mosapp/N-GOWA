@@ -654,7 +654,7 @@ export const ACTIONS_HORS_ECRAN: OffScreenAction[] = [
 
 export const PAUSE_ACTIVITIES = [
   "Va regarder dehors et trouve quelque chose de vert !",
-  "Fais 5 sauts comme Coco pour te dégourdir les jambes !",
+  "Fais 5 sauts comme Kofi pour te dégourdir les jambes !",
   "Va boire un grand verre d'eau, comme Awa avant l'école !",
   "Ferme les yeux et écoute : combien de bruits différents entends-tu ?",
   "Va dire à quelqu'un que tu l'aimes. C'est bon pour le cœur !",

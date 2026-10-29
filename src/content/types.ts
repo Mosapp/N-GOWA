@@ -73,3 +73,120 @@ export type OffScreenAction = {
   palier: Palier;
   texte: string;
 };
+
+/* ------------------------------------------------------------------ */
+/* Aventure N'GOWA : zones, missions, défis réels, pins               */
+/* ------------------------------------------------------------------ */
+
+/** Deux niveaux de complexité pédagogique. */
+export type Complexite = "petit" | "grand";
+
+/** Trois tranches d'âge pour le temps d'écran. */
+export type TrancheAge = "4-5" | "6-8" | "9-10";
+
+export type ZoneId = "village-tri" | "riviere-vivante" | "foret-decouvertes" | "royaume-energie";
+
+export type ZoneContent = {
+  id: ZoneId;
+  nom: string;
+  pilier: ThemeId;
+  accroche: string;
+  couleur: string;
+  /** "jouable" : missions réellement disponibles ; "bientot" : zone annoncée, sans contenu. */
+  disponibilite: "jouable" | "bientot";
+};
+
+export type CompetenceId =
+  | "trier-plastique"
+  | "trier-papier"
+  | "trier-verre"
+  | "trier-restes"
+  | "reperer-danger"
+  | "reutiliser";
+
+export type BacId =
+  | "plastique"
+  | "papier"
+  | "verre"
+  | "restes"
+  | "danger"
+  | "reutiliser"
+  | "trier";
+
+export type BacContent = {
+  id: BacId;
+  nom: string;
+  couleur: string;
+  couleurFoncee: string;
+  /** Pictogramme dessiné sur le bac (voir components/art/Bin). */
+  picto: "bouteille" | "feuille-papier" | "bocal" | "epluchure" | "main" | "boucle" | "poubelle";
+};
+
+export type ObjetATrier = {
+  id: string;
+  nom: string;
+  emoji: string;
+  bac: BacId;
+  competence: CompetenceId;
+  /** Explication courte, dite après une bonne réponse. */
+  pourquoi: string;
+  /** Indice bienveillant après une erreur. */
+  indice: string;
+  /** Objet réservé aux 6-10 ans (plus difficile). */
+  grandsSeulement?: boolean;
+};
+
+export type QuestionMission = {
+  question: string;
+  reponses: string[];
+  bonneReponse: string;
+  explication: string;
+};
+
+export type MissionContent = {
+  id: string;
+  zoneId: ZoneId;
+  ordre: number;
+  titre: string;
+  personnageId: string;
+  /** Ce que dit le personnage au début de la mission. */
+  histoire: { petit: string; grand: string };
+  consigne: { petit: string; grand: string };
+  /** Les trois questions de la ligne éditoriale. */
+  objectif: { japprends: string; jepratique: string; pourquoi: string };
+  bacs: { petit: BacId[]; grand: BacId[] };
+  objets: ObjetATrier[];
+  nombreObjets: { petit: number; grand: number };
+  /** Question de compréhension, uniquement pour les 6-10 ans. */
+  question: QuestionMission;
+  defiId: string;
+};
+
+export type DefiReelContent = {
+  id: string;
+  zoneId: ZoneId;
+  titre: string;
+  consigne: { petit: string; grand: string };
+  pourquoi: string;
+  securite: string;
+  emoji: string;
+};
+
+export type PinRegle =
+  | { type: "points-zone"; zoneId: ZoneId; seuil: number }
+  | { type: "points-total"; seuil: number; zoneRequise: ZoneId }
+  | { type: "competence"; competence: CompetenceId; missionId: string }
+  | { type: "defis-valides"; nombre: number }
+  | { type: "champion"; seuil: number; pinsRequis: string[] };
+
+export type PinContent = {
+  id: string;
+  nom: string;
+  description: string;
+  /** Texte affiché tant que le pin n'est pas obtenu. */
+  commentObtenir: string;
+  couleur: string;
+  couleurFoncee: string;
+  embleme: "tri" | "boucle" | "goutte" | "feuille" | "eclair" | "etoile" | "coeur";
+  regle: PinRegle;
+};

@@ -1,5 +1,5 @@
-import { AppShell } from "@/components/AppShell";
+import { NgowaApp } from "@/components/NgowaApp";
 
 export default function HomePage() {
-  return <AppShell />;
+  return <NgowaApp />;
 }
