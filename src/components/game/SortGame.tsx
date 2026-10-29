@@ -20,24 +20,22 @@ type Retour =
   | { type: "erreur"; texte: string; cle: number };
 
 /**
- * Place les déchets sur la moitié basse de la scène, en rangées un peu
- * désordonnées (comme s'ils traînaient par terre). Déterministe : la même
- * liste donne toujours la même disposition. `auSol` : décor vide dont le sol
- * occupe le bas de l'image, les objets y sont posés plus bas.
+ * Disposition des déchets en rangées un peu désordonnées, comme s'ils
+ * traînaient par terre. `f` va de 0 (rangée du fond) à 1 (rangée de devant).
+ * Déterministe : la même liste donne toujours la même disposition.
  */
-function positions(n: number, auSol: boolean): { x: number; y: number; angle: number }[] {
+function positions(n: number): { x: number; f: number; angle: number }[] {
   const colonnes = n <= 3 ? n : n <= 6 ? 3 : 4;
   const rangees = Math.ceil(n / colonnes);
-  const [haut, bas] = auSol ? [58, 86] : [44, 82];
   return Array.from({ length: n }, (_, i) => {
     const rangee = Math.floor(i / colonnes);
     const dansRangee = rangee === rangees - 1 ? n - rangee * colonnes : colonnes;
     const col = i % colonnes;
     const decalX = Math.sin(i * 12.9898) * 4;
-    const decalY = Math.cos(i * 78.233) * 3;
+    const decalF = Math.cos(i * 78.233) * 0.07;
     return {
       x: ((col + 0.5) / dansRangee) * 80 + 10 + decalX,
-      y: (rangees === 1 ? (haut + bas) / 2 : haut + (rangee / (rangees - 1)) * (bas - haut)) + decalY,
+      f: Math.min(1, Math.max(0, (rangees === 1 ? 0.5 : rangee / (rangees - 1)) + decalF)),
       angle: Math.round(Math.sin(i * 4.1) * 14),
     };
   });
@@ -98,7 +96,7 @@ export function SortGame({
   const glisse = useRef<{ x: number; y: number; id: number; objetId: string; bouge: boolean } | null>(null);
 
   const illustree = objets.every((o) => o.image);
-  const [places] = useState(() => positions(objets.length, illustree));
+  const [places] = useState(() => positions(objets.length));
   const restants = objets.filter((o) => !ranges.includes(o.id));
   const enJeu = objets.filter((o) => !ranges.includes(o.id) || envols[o.id]);
   const objetChoisi = restants.find((o) => o.id === choisi) ?? restants[0] ?? null;
@@ -259,21 +257,26 @@ export function SortGame({
   };
 
   const grand = complexite === "grand";
-  const tailleBac = bacs.length >= 4 ? 70 : bacs.length === 3 ? 84 : 96;
   const w = dims?.w ?? 340;
   const h = dims?.h ?? 420;
   const borne = (v: number, min: number, max: number) => Math.round(Math.min(max, Math.max(min, v)));
-  /** Taille en px d'un objet selon la scène ; les objets dessinés rapetissent au loin. */
-  const taille = (o: ObjetATrier, y: number) => {
-    if (!o.image) return borne(Math.min(w * 0.17, h * 0.17), 52, objets.length > 6 ? 84 : 94);
-    const perspective = 0.78 + ((y - 58) / 28) * 0.3;
-    return borne(Math.min(w * 0.22, h * 0.2) * perspective, 50, 130);
+  // Les poubelles sont posées au sol, en bas de la scène.
+  const tailleBac = borne(Math.min(((w - 16) / bacs.length) * 0.78, h * 0.19), 50, 112);
+  const hauteurBacs = Math.round(tailleBac * 1.12 + 30);
+  /** Taille en px d'un objet ; les objets dessinés rapetissent au fond. */
+  const taille = (o: ObjetATrier, f: number) => {
+    if (!o.image) return borne(Math.min(w * 0.18, h * 0.13), 50, objets.length > 6 ? 84 : 94);
+    return borne(Math.min(w * 0.21, h * 0.13) * (0.8 + f * 0.3), 46, 110);
   };
-  /** Position en px du centre de l'objet, toujours entièrement dans la scène. */
-  const centre = (x: number, y: number, t: number) => ({
-    left: borne((x / 100) * w, t / 2 + 6, w - t / 2 - 6),
-    top: borne((y / 100) * h, t / 2 + 6, h - t / 2 - 8),
-  });
+  /** Centre en px de l'objet : entre le haut du sol et les poubelles, jamais hors de la scène. */
+  const centre = (x: number, f: number, t: number) => {
+    const zoneHaut = Math.max(58, h * (illustree ? 0.44 : 0.2)) + t / 2;
+    const zoneBas = Math.max(zoneHaut, h - hauteurBacs - 6 - t / 2);
+    return {
+      left: borne((x / 100) * w, t / 2 + 6, w - t / 2 - 6),
+      top: Math.round(zoneHaut + f * (zoneBas - zoneHaut)),
+    };
+  };
 
   return (
     <div className="flex min-h-[calc(100dvh-88px)] flex-col">
@@ -284,7 +287,7 @@ export function SortGame({
       </div>
 
       {/* Scène : les déchets traînent par terre */}
-      <div ref={sceneRef} className="relative mt-3 min-h-[300px] flex-1">
+      <div ref={sceneRef} className="relative mt-3 min-h-[380px] flex-1">
         <div className="absolute inset-0 overflow-hidden rounded-[2rem] border-4 border-white shadow-[0_6px_0_rgba(45,42,38,0.1)]">
           {/* eslint-disable-next-line @next/next/no-img-element -- illustration locale de la mission */}
           <img src={scene} alt="" className="h-full w-full object-cover" draggable={false} />
@@ -304,13 +307,13 @@ export function SortGame({
           const envol = envols[o.id];
           const actif = objetChoisi?.id === o.id;
           const secoue = secousse?.id === o.id;
-          const t = taille(o, place.y);
-          const { left, top } = centre(place.x, place.y, t);
+          const t = taille(o, place.f);
+          const { left, top } = centre(place.x, place.f, t);
           return (
             <div
               key={o.id}
               className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ left, top, zIndex: tenu === o.id || envol ? 60 : 20 + Math.round(place.y / 4) }}
+              style={{ left, top, zIndex: tenu === o.id || envol ? 60 : 20 + Math.round(place.f * 10) }}
             >
               <div
                 className={o.image ? "" : actif || envol ? "" : "anim-float"}
@@ -414,13 +417,12 @@ export function SortGame({
             </div>
           ) : null}
         </div>
-      </div>
 
-      {/* Les poubelles */}
-      <div
-        className="mt-3 grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${bacs.length}, minmax(0, 1fr))` }}
-      >
+        {/* Les poubelles, debout sur le sol devant la scène */}
+        <div
+          className="absolute inset-x-2 bottom-2 z-[15] grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${bacs.length}, minmax(0, 1fr))` }}
+        >
         {bacs.map((id) => {
           const bac = BACS[id];
           const actif = survol === id;
@@ -433,13 +435,25 @@ export function SortGame({
               type="button"
               disabled={!objetChoisi}
               onClick={() => objetChoisi && trier(objetChoisi, id)}
-              className={`relative flex flex-col items-center rounded-3xl px-1 pb-2 pt-1 transition-transform ${
-                actif ? "scale-110 bg-white" : "bg-white/60"
-              } ${aide === id ? "anim-glow bg-ng-sun-soft" : ""}`}
+              className={`relative flex flex-col items-center rounded-3xl pb-1 transition-transform duration-150 ${
+                actif ? "scale-110" : ""
+              } ${aide === id ? "anim-glow bg-ng-sun-soft/70" : ""}`}
               aria-label={`Mettre « ${objetChoisi?.nom ?? ""} » : ${bac.nom}`}
             >
-              <Bin bac={bac} ouvert={actif || ouvert === id} size={tailleBac} />
-              <span className="mt-1 text-center font-display text-sm leading-tight" style={{ color: bac.couleurFoncee }}>
+              <span className="relative block">
+                {/* Ombre au sol sous la poubelle */}
+                <span
+                  className="absolute bottom-0 left-1/2 h-3 w-[90%] -translate-x-1/2 translate-y-1/2 rounded-[50%] bg-black/30 blur-[3px]"
+                  aria-hidden
+                />
+                <span className="relative block" style={{ filter: actif ? "drop-shadow(0 0 8px rgba(255,255,255,0.95))" : undefined }}>
+                  <Bin bac={bac} ouvert={actif || ouvert === id} size={tailleBac} />
+                </span>
+              </span>
+              <span
+                className="mt-1 max-w-full truncate rounded-full bg-white/90 px-2 py-0.5 text-center font-display text-xs leading-tight shadow sm:text-sm"
+                style={{ color: bac.couleurFoncee }}
+              >
                 {bac.nom}
               </span>
               {gain?.bac === id ? (
@@ -454,6 +468,7 @@ export function SortGame({
             </button>
           );
         })}
+        </div>
       </div>
     </div>
   );
