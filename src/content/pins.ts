@@ -5,9 +5,10 @@ import type { PinContent } from "./types";
  *
  * Les seuils sont CONFIGURABLES ici et devront être équilibrés après des
  * tests avec des enfants. Les seuils du cahier des charges (200 / 400 / 600 /
- * 800 / 1000) servent de base ; « Gardien de l'Eau » et « Ami de la Nature »
- * demandent 150 points dans leur zone, qui compte 3 missions (contre 4 au
- * Village), pour rester atteignables par les 4-5 ans.
+ * 800 / 1000) servent de base ; « Gardien de l'Eau », « Ami de la Nature » et
+ * « Énergie Maligne » demandent 150 points dans leur zone (3 missions), et
+ * « Champion N'GOWA » 600 points au total + les 4 pins de zone, pour rester
+ * atteignables par les 4-5 ans (qui ont moins d'objets par mission).
  *
  * Un pin de pilier demande aussi d'avoir joué dans la zone correspondante :
  * on ne peut pas devenir « Gardien de l'Eau » en ne triant que des déchets.
@@ -67,23 +68,23 @@ export const PINS: PinContent[] = [
     id: "energie-maligne",
     nom: "Énergie Maligne",
     description: "Tu adoptes des gestes qui économisent l'énergie.",
-    commentObtenir: "800 points et des missions dans le Royaume de l'Énergie (bientôt).",
+    commentObtenir: "Gagne 150 points dans le Royaume de l'Énergie.",
     couleur: "#E0762E",
     couleurFoncee: "#9C4A12",
     embleme: "eclair",
-    regle: { type: "points-total", seuil: 800, zoneRequise: "royaume-energie" },
+    regle: { type: "points-zone", zoneId: "royaume-energie", seuil: 150 },
   },
   {
     id: "champion-ngowa",
     nom: "Champion N'GOWA",
     description: "Tu progresses dans tous les domaines de l'écologie.",
-    commentObtenir: "1 000 points et les pins des quatre zones.",
+    commentObtenir: "600 points et les pins des quatre zones.",
     couleur: "#2D2A26",
     couleurFoncee: "#000000",
     embleme: "etoile",
     regle: {
       type: "champion",
-      seuil: 1000,
+      seuil: 600,
       pinsRequis: ["eco-tri", "gardien-eau", "ami-nature", "energie-maligne"],
     },
   },

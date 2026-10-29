@@ -369,7 +369,7 @@ export function prochainPin(save: Sauvegarde): PinContent | null {
       (p) =>
         !save.pins[p.id] &&
         p.regle.type !== "points-total" &&
-        p.regle.type !== "champion" &&
+        (p.regle.type !== "champion" || p.regle.pinsRequis.every((id) => save.pins[id])) &&
         (p.regle.type !== "points-zone" || statutZone(save, p.regle.zoneId) === "ouverte"),
     ) ?? null
   );

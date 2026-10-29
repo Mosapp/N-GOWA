@@ -103,7 +103,7 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                   <IconCheck size={28} />
                 </span>
                 <p className="font-display text-lg">
-                  Tu as terminé toutes les missions disponibles ! Rejoue pour gagner plus d&apos;étoiles. De nouvelles zones arrivent bientôt.
+                  Bravo, tu as terminé toute l&apos;aventure N&apos;GOWA ! Rejoue tes missions préférées pour gagner plus d&apos;étoiles.
                 </p>
               </div>
             )}

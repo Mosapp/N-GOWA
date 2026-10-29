@@ -30,7 +30,9 @@ export function PinsScreen({ save }: { save: Sauvegarde }) {
     <main className="mx-auto w-full max-w-3xl px-4 pt-2 lg:max-w-5xl lg:px-8 lg:pt-8">
       <h1 className="font-display text-3xl">Mes pins</h1>
       <div className="mt-2 flex items-center gap-2">
-        <Illustration src={DECORS.coffre} ratio="1 / 1" className="w-24 shrink-0 rounded-3xl sm:w-28" />
+        <div className="w-24 shrink-0 sm:w-28">
+          <Illustration src={DECORS.coffre} ratio="1 / 1" className="rounded-3xl" />
+        </div>
         <div className="flex-1">
           <SpeechBubble qui="Awa" color="#7A4BC0" size="sm" texteVoix={message}>
             <p>{message}</p>
