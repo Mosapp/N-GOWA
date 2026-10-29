@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { PINS } from "@/content/pins";
@@ -43,6 +46,13 @@ function jouer(save: Sauvegarde, res: ResultatMission) {
 }
 
 describe("contenu des missions", () => {
+  it("chaque mission a sa vignette illustrée, présente dans public/", () => {
+    for (const m of MISSIONS) {
+      expect(m.vignette, m.id).toBeDefined();
+      expect(existsSync(join(process.cwd(), "public", m.vignette!)), m.vignette).toBe(true);
+    }
+  });
+
   it("chaque mission a un défi réel et des identifiants uniques", () => {
     const ids = MISSIONS.map((m) => m.id);
     expect(new Set(ids).size).toBe(ids.length);

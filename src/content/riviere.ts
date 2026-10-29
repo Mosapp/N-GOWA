@@ -9,6 +9,7 @@ import type { DefiReelContent, MissionContent } from "./types";
 export const RIVIERE_MISSIONS: MissionContent[] = [
   {
     id: "chaque-goutte",
+    vignette: "/illustrations/missions/chaque-goutte.webp",
     zoneId: "riviere-vivante",
     ordre: 1,
     titre: "Chaque goutte compte",
@@ -130,6 +131,7 @@ export const RIVIERE_MISSIONS: MissionContent[] = [
   },
   {
     id: "riviere-propre",
+    vignette: "/illustrations/missions/riviere-propre.webp",
     zoneId: "riviere-vivante",
     ordre: 2,
     titre: "La rivière propre",
@@ -237,6 +239,7 @@ export const RIVIERE_MISSIONS: MissionContent[] = [
   },
   {
     id: "tresor-de-l-eau",
+    vignette: "/illustrations/missions/tresor-de-l-eau.webp",
     zoneId: "riviere-vivante",
     ordre: 3,
     titre: "Le trésor de l'eau",

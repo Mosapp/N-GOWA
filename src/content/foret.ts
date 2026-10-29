@@ -9,6 +9,7 @@ import type { DefiReelContent, MissionContent } from "./types";
 export const FORET_MISSIONS: MissionContent[] = [
   {
     id: "qui-vit-ou",
+    vignette: "/illustrations/missions/qui-vit-ou.webp",
     zoneId: "foret-decouvertes",
     ordre: 1,
     titre: "Qui vit où ?",
@@ -158,6 +159,7 @@ export const FORET_MISSIONS: MissionContent[] = [
   },
   {
     id: "amis-nature",
+    vignette: "/illustrations/missions/amis-nature.webp",
     zoneId: "foret-decouvertes",
     ordre: 2,
     titre: "Les amis de la nature",
@@ -269,6 +271,7 @@ export const FORET_MISSIONS: MissionContent[] = [
   },
   {
     id: "maison-propre",
+    vignette: "/illustrations/missions/maison-propre.webp",
     zoneId: "foret-decouvertes",
     ordre: 3,
     titre: "Une maison propre pour chaque animal",
