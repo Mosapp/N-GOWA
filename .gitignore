@@ -15,3 +15,4 @@ out/
 
 # logs
 *.log
+tsconfig.tsbuildinfo

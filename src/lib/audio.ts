@@ -5,6 +5,15 @@
 
 let audioCtx: AudioContext | null = null;
 
+/** Préférences de l'enfant : les sons et la voix peuvent être coupés. */
+const prefs = { sons: true, voix: true };
+
+export function reglerAudio(next: { sons: boolean; voix: boolean }) {
+  prefs.sons = next.sons;
+  prefs.voix = next.voix;
+  if (!next.voix) stopSpeaking();
+}
+
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   const Ctor =
@@ -17,17 +26,19 @@ function getCtx(): AudioContext | null {
   return audioCtx;
 }
 
-type Tone = "good" | "bad" | "win" | "tap" | "pop";
+export type Tone = "good" | "bad" | "win" | "tap" | "pop";
 
 const RECIPES: Record<Tone, { freqs: number[]; duration: number; type: OscillatorType }> = {
   good: { freqs: [660, 880], duration: 0.16, type: "sine" },
-  bad: { freqs: [220, 165], duration: 0.22, type: "triangle" },
+  // Son d'erreur doux (pas de « buzzer ») : on se trompe, on réessaie.
+  bad: { freqs: [392, 330], duration: 0.14, type: "sine" },
   win: { freqs: [523, 659, 784, 1046], duration: 0.15, type: "sine" },
-  tap: { freqs: [420], duration: 0.06, type: "square" },
+  tap: { freqs: [520], duration: 0.05, type: "sine" },
   pop: { freqs: [880, 1320], duration: 0.09, type: "sine" },
 };
 
 export function playTone(tone: Tone) {
+  if (!prefs.sons) return;
   const ctx = getCtx();
   if (!ctx) return;
   const recipe = RECIPES[tone];
@@ -60,6 +71,7 @@ function pickFrenchVoice(): SpeechSynthesisVoice | null {
 }
 
 export function speak(text: string, rate = 0.92) {
+  if (!prefs.voix) return;
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
     window.speechSynthesis.cancel();

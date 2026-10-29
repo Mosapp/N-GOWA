@@ -1,159 +1,342 @@
 @import "tailwindcss";
 
+/* ====================================================================== */
+/* Design system N'GOWA                                                   */
+/* Palette inspirée de la nature africaine : vert végétal, crème doux,    */
+/* bleu de l'eau, jaune soleil, touches corail et terre latérite.         */
+/* Les couleurs « foncées » portent du texte blanc (contraste ≥ 4,5:1).   */
+/* ====================================================================== */
+
 @theme {
-  --color-ng-green: #58cc02;
-  --color-ng-green-dark: #3fa302;
-  --color-ng-blue: #1cb0f6;
-  --color-ng-blue-dark: #1489c9;
-  --color-ng-yellow: #ffc800;
-  --color-ng-yellow-dark: #d9a400;
-  --color-ng-orange: #ff9600;
-  --color-ng-orange-dark: #d67c00;
-  --color-ng-red: #ff4b4b;
-  --color-ng-red-dark: #d13a3a;
-  --color-ng-purple: #b45ce2;
-  --color-ng-purple-dark: #8e43bd;
-  --color-ng-teal: #00b5a5;
-  --color-ng-ink: #2b2b3a;
-  --color-ng-cream: #fff8e7;
-  --color-ng-sand: #ffe9c7;
-  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
-  --font-body: "Nunito", ui-rounded, system-ui, sans-serif;
+  --color-ng-green: #237a44;
+  --color-ng-green-dark: #175a31;
+  --color-ng-leaf: #3fa266;
+  --color-ng-leaf-soft: #e3f3e6;
+
+  --color-ng-blue: #1a6fa8;
+  --color-ng-blue-dark: #114f7a;
+  --color-ng-water: #4bb0e6;
+  --color-ng-water-soft: #e2f2fb;
+
+  --color-ng-yellow: #f6b427;
+  --color-ng-yellow-dark: #c98a0e;
+  --color-ng-sun-soft: #fff1c9;
+
+  --color-ng-coral: #c9432c;
+  --color-ng-coral-dark: #9e3220;
+  --color-ng-coral-soft: #fde3dc;
+
+  --color-ng-earth: #b4532a;
+  --color-ng-earth-dark: #8a3d1d;
+
+  --color-ng-purple: #7a4bc0;
+  --color-ng-purple-dark: #5a3496;
+
+  /* Compatibilité avec les mini-jeux existants (games.tsx). */
+  --color-ng-orange: #e0762e;
+  --color-ng-orange-dark: #b4532a;
+  --color-ng-red: #c9432c;
+  --color-ng-red-dark: #9e3220;
+  --color-ng-teal: #1a8a80;
+
+  --color-ng-ink: #2d2a26;
+  --color-ng-muted: #6b645c;
+  --color-ng-cream: #fff6e6;
+  --color-ng-sand: #f8e6c8;
+
+  --font-display: var(--font-baloo), "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: var(--font-nunito), ui-rounded, system-ui, sans-serif;
 }
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
+}
+
+html {
+  /* Texte un peu plus grand pour les jeunes lecteurs. */
+  font-size: 17px;
 }
 
 body {
   font-family: var(--font-body);
   color: var(--color-ng-ink);
-  background:
-    radial-gradient(circle at 12% 8%, #ffe9a8 0%, transparent 45%),
-    radial-gradient(circle at 88% 4%, #b6f0c9 0%, transparent 40%),
-    radial-gradient(circle at 50% 100%, #ffd9a8 0%, transparent 55%),
-    linear-gradient(180deg, #fffdf5 0%, #f4fbef 100%);
-  background-attachment: fixed;
+  background-color: var(--color-ng-cream);
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
 .font-display {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.005em;
 }
 
-/* ---------- Boutons "3D" façon Duolingo ---------- */
-.btn3d {
+:focus-visible {
+  outline: 4px solid var(--color-ng-blue);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* ---------- Boutons épais ---------- */
+.btn-ng {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 56px;
+  border-radius: 1.4rem;
+  border-bottom: 6px solid rgba(0, 0, 0, 0.22);
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.1;
+  transition:
+    transform 0.08s ease,
+    border-bottom-width 0.08s ease,
+    filter 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+.btn-ng:active:not(:disabled) {
+  transform: translateY(4px);
+  border-bottom-width: 2px;
+}
+.btn-ng:disabled {
+  filter: grayscale(0.5) opacity(0.6);
+  cursor: not-allowed;
+}
+
+/* Ancienne classe utilisée par les mini-jeux existants. */
+.btn3d {
   border-radius: 1.25rem;
   border-bottom-width: 6px;
   border-bottom-style: solid;
   font-family: var(--font-display);
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  transition: transform 0.08s ease, filter 0.15s ease;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.06);
+  transition: transform 0.08s ease;
   cursor: pointer;
-  user-select: none;
 }
 .btn3d:active:not(:disabled) {
   transform: translateY(4px);
   border-bottom-width: 2px;
 }
-.btn3d:disabled {
-  filter: grayscale(0.35) opacity(0.65);
-  cursor: not-allowed;
-}
 
 /* ---------- Cartes ---------- */
+.card-ng {
+  border-radius: 1.75rem;
+  background: #ffffff;
+  border: 3px solid rgba(45, 42, 38, 0.07);
+  box-shadow: 0 6px 0 rgba(45, 42, 38, 0.07);
+}
 .card-soft {
   border-radius: 1.75rem;
   background: #ffffff;
-  border: 3px solid #2b2b3a12;
-  box-shadow: 0 10px 0 rgba(43, 43, 58, 0.07);
+  border: 3px solid rgba(45, 42, 38, 0.07);
+  box-shadow: 0 6px 0 rgba(45, 42, 38, 0.07);
 }
 
-/* ---------- Bande de tissu (wax/kente) ---------- */
+/* ---------- Motif de pagne (bandeau décoratif) ---------- */
+.pagne {
+  background-color: var(--color-ng-earth);
+  background-image:
+    radial-gradient(circle at 10px 10px, var(--color-ng-yellow) 0 4px, transparent 5px),
+    linear-gradient(135deg, transparent 0 40%, rgba(255, 246, 230, 0.35) 40% 60%, transparent 60%);
+  background-size: 20px 20px, 20px 20px;
+}
 .kente {
   background-image: repeating-linear-gradient(
     90deg,
-    #ff9600 0 14px,
-    #ffc800 14px 28px,
-    #58cc02 28px 42px,
-    #1cb0f6 42px 56px,
-    #b45ce2 56px 70px
-  );
-}
-.kente-soft {
-  background-image: repeating-linear-gradient(
-    90deg,
-    #ffd9a1 0 18px,
-    #ffe9c7 18px 36px,
-    #d8f5c0 36px 54px,
-    #cdefff 54px 72px
+    var(--color-ng-earth) 0 14px,
+    var(--color-ng-yellow) 14px 28px,
+    var(--color-ng-green) 28px 42px,
+    var(--color-ng-blue) 42px 56px
   );
 }
 
-.dashed-path {
-  background-image: linear-gradient(
-    to bottom,
-    #2b2b3a30 0 12px,
-    transparent 12px 26px
-  );
-  background-size: 6px 26px;
-  background-repeat: repeat-y;
-  background-position: center;
-}
-
-/* ---------- Animations ---------- */
+/* ---------- Animations (courtes et utiles) ---------- */
 @keyframes ng-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 @keyframes ng-pop {
-  0% { transform: scale(0.6); opacity: 0; }
-  70% { transform: scale(1.08); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes ng-wiggle {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 @keyframes ng-shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-7px);
+  }
+  50% {
+    transform: translateX(7px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
 }
 @keyframes ng-rise {
-  0% { transform: translateY(14px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-@keyframes ng-sparkle {
-  0% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
-  50% { transform: scale(1.1) rotate(20deg); opacity: 1; }
-  100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
+@keyframes ng-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-14px) scale(1.04);
+  }
+  60% {
+    transform: translateY(0) scale(0.98);
+  }
+}
+@keyframes ng-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(246, 180, 39, 0.75);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(246, 180, 39, 0);
+  }
+}
+@keyframes ng-float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-46px);
+    opacity: 0;
+  }
+}
+@keyframes ng-spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ng-confetti {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(70vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+@keyframes ng-wiggle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
 }
 
-.anim-float { animation: ng-float 3.4s ease-in-out infinite; }
-.anim-pop { animation: ng-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.anim-wiggle { animation: ng-wiggle 1.6s ease-in-out infinite; }
-.anim-shake { animation: ng-shake 0.4s ease-in-out; }
-.anim-rise { animation: ng-rise 0.35s ease-out both; }
-.anim-sparkle { animation: ng-sparkle 2s ease-in-out infinite; }
-
-/* ---------- Accessibilité ---------- */
-.tap-target {
-  min-height: 64px;
-  min-width: 64px;
+.anim-float {
+  animation: ng-float 3.4s ease-in-out infinite;
 }
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { scrollbar-width: none; }
+.anim-pop {
+  animation: ng-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.anim-shake {
+  animation: ng-shake 0.4s ease-in-out;
+}
+.anim-rise {
+  animation: ng-rise 0.3s ease-out both;
+}
+.anim-bounce {
+  animation: ng-bounce 0.6s ease-out;
+}
+.anim-glow {
+  animation: ng-glow 1.6s ease-out infinite;
+}
+.anim-float-up {
+  animation: ng-float-up 0.9s ease-out forwards;
+}
+.anim-spin-slow {
+  animation: ng-spin-slow 40s linear infinite;
+}
+.anim-wiggle {
+  animation: ng-wiggle 1.6s ease-in-out infinite;
+}
+.anim-sparkle {
+  animation: ng-pop 0.5s ease-out both;
+}
+.confetti {
+  animation: ng-confetti 1.6s ease-in forwards;
+}
 
+/* Animations réduites : réglage de l'enfant OU préférence du système. */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
 @media (prefers-reduced-motion: reduce) {
-  .anim-float, .anim-wiggle, .anim-sparkle { animation: none; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------- Divers ---------- */
+.tap-target {
+  min-height: 56px;
+  min-width: 56px;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.safe-bottom {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+/* ---------- Impression de la fiche de progression ---------- */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    border: 2px solid #ddd !important;
+  }
 }

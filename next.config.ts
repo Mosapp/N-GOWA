@@ -23,6 +23,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Le service worker doit toujours être revérifié pour que les mises
+        // à jour de l'application arrivent sur les appareils.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
     ];
   },
 };

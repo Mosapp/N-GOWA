@@ -1,33 +1,47 @@
 import type { Metadata, Viewport } from "next";
+import { Baloo_2, Nunito } from "next/font/google";
 import type { ReactNode } from "react";
+
 import "./globals.css";
 
+// Polices téléchargées au build et servies par l'application :
+// elles restent disponibles hors connexion.
+const baloo = Baloo_2({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-baloo",
+  display: "swap",
+});
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-nunito",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "N'GOWA — Apprendre. Jouer. Découvrir. Agir.",
+  title: "N'GOWA — Apprendre. Jouer. Comprendre. Agir.",
   description:
-    "N'GOWA est une aventure ludo-éducative africaine pour les enfants de 4 à 10 ans : environnement, culture, langues et actions réelles.",
+    "N'GOWA est une aventure éducative écologique pour les enfants de 4 à 10 ans en Côte d'Ivoire : trier, économiser l'eau et l'énergie, protéger la nature.",
   applicationName: "N'GOWA",
+  appleWebApp: { capable: true, title: "N'GOWA", statusBarStyle: "default" },
+  icons: {
+    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#58CC02",
+  themeColor: "#237A44",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="fr">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="min-h-screen text-ng-ink antialiased">{children}</body>
+    <html lang="fr" className={`${baloo.variable} ${nunito.variable}`}>
+      <body className="min-h-screen antialiased">{children}</body>
     </html>
   );
 }
