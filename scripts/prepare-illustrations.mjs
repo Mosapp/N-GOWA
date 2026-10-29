@@ -76,6 +76,36 @@ const DECORS = [
   ["Butterfly_smiling_", "avatars/papillon", 320],
   ["Baby_chimpanzee_smiling_portrait_", "avatars/chimpanze", 320],
   ["Pygmy_hippo_smiling_", "avatars/hippo", 320],
+  // Décors « propres » des scènes de ramassage (5ᵉ lot d'images)
+  ["Vendors_at_open-air_market_", "scenes/marche-adjoua", 896],
+  ["Children_playing_in_school_court#U2026_dda9117e", "scenes/cour-ecole", 896],
+  ["Sewing_workshop_courtyard_with_f#U2026_ceb951a4", "scenes/seconde-vie", 896],
+  ["Courtyard_of_Ivorian_house_4e8597bf", "scenes/objets-dangereux", 896],
+];
+
+// Planches d'objets (3×3 sur fond blanc) : chaque case devient un objet détouré,
+// dans l'ordre de lecture. null = case vide.
+const PLANCHES = [
+  ["Garbage_items_arranged_in_grid_7b08945d", [
+    "sachet-eau", "bouteille-plastique", "sac-marche",
+    "carton", "journal", "peau-banane",
+    "epluchures-igname", "peau-mangue", "gobelet",
+  ]],
+  ["Objects_arranged_in_3x3_grid_8f786022", [
+    "bouteille-verre", "pot-miel", "feuille-dessin",
+    "cahier-fini", "emballage-biscuit", "sachet-eau-ecole",
+    "peau-orange", "reste-riz", "coco",
+  ]],
+  ["Household_objects_grid_on_white_fa7c70bf", [
+    "bocal", "pagne", "carton-jouets",
+    "cahier-moitie", "bidon", "sachet-dechire",
+    "peau-banane-sv", "journal-mouille", "gobelet-casse",
+  ]],
+  ["Objects_arranged_in_3x3_grid_e9cb9d31", [
+    "pile", "medicaments", "ampoule-cassee",
+    "telephone-casse", "bouteille-danger", "epluchures-danger",
+    "feuilles-marche", "enveloppe", null,
+  ]],
 ];
 
 // Plusieurs dossiers sources possibles (un par lot d'images), séparés par des virgules.
@@ -146,11 +176,98 @@ async function detourer(fichier) {
   return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
 }
 
+/** Dilate (ou érode) un masque binaire avec un carré de rayon r. */
+function morpho(masque, w, h, r, dilater) {
+  const passe = (src, horizontal) => {
+    const dst = new Uint8Array(w * h);
+    for (let y = 0; y < h; y += 1) {
+      for (let x = 0; x < w; x += 1) {
+        let v = dilater ? 0 : 1;
+        for (let d = -r; d <= r && v === (dilater ? 0 : 1); d += 1) {
+          const nx = horizontal ? x + d : x;
+          const ny = horizontal ? y : y + d;
+          const dedans = nx >= 0 && ny >= 0 && nx < w && ny < h;
+          const m = dedans ? src[ny * w + nx] : 0;
+          if (dilater ? m : !m) v = dilater ? 1 : 0;
+        }
+        dst[y * w + x] = v;
+      }
+    }
+    return dst;
+  };
+  return passe(passe(masque, true), false);
+}
+
+/**
+ * Détoure un objet d'une planche sur fond blanc : on ferme les petites
+ * ouvertures du contour, on remplit les trous (plastique, papier clair…),
+ * puis l'ombre grise posée sur le blanc devient une ombre transparente.
+ */
+async function detourerObjet(entree) {
+  const { data, info } = await sharp(entree).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width: w, height: h } = info;
+  const n = w * h;
+  const blancheur = (k) => 255 - Math.min(data[k * 4], data[k * 4 + 1], data[k * 4 + 2]);
+  const visible = new Uint8Array(n);
+  for (let k = 0; k < n; k += 1) visible[k] = blancheur(k) > 14 ? 1 : 0;
+  const ferme = morpho(visible, w, h, 3, true);
+  // Fond = ce qui est relié au bord sans traverser l'objet fermé.
+  const fond = new Uint8Array(n);
+  const pile = [];
+  for (let x = 0; x < w; x += 1) pile.push(x, (h - 1) * w + x);
+  for (let y = 0; y < h; y += 1) pile.push(y * w, y * w + w - 1);
+  while (pile.length) {
+    const k = pile.pop();
+    if (fond[k] || ferme[k]) continue;
+    fond[k] = 1;
+    const x = k % w;
+    if (x > 0) pile.push(k - 1);
+    if (x < w - 1) pile.push(k + 1);
+    if (k >= w) pile.push(k - w);
+    if (k < n - w) pile.push(k + w);
+  }
+  const plein = new Uint8Array(n);
+  for (let k = 0; k < n; k += 1) plein[k] = fond[k] ? 0 : 1;
+  const objet = morpho(plein, w, h, 4, false);
+  // Ombre : pixels gris clairs, peu saturés, à moins de 22 px du fond.
+  const profondeur = new Int16Array(n).fill(-1);
+  const file = [];
+  for (let k = 0; k < n; k += 1) if (!objet[k]) { profondeur[k] = 0; file.push(k); }
+  for (let t = 0; t < file.length; t += 1) {
+    const k = file[t];
+    const x = k % w;
+    for (const v of [x > 0 ? k - 1 : -1, x < w - 1 ? k + 1 : -1, k - w, k + w]) {
+      if (v < 0 || v >= n || profondeur[v] !== -1) continue;
+      const i = v * 4;
+      const max = Math.max(data[i], data[i + 1], data[i + 2]);
+      const min = Math.min(data[i], data[i + 1], data[i + 2]);
+      const gris = max > 0 && (max - min) / max < 0.07 && max >= 165;
+      if (!gris || profondeur[k] >= 22) continue;
+      profondeur[v] = profondeur[k] + 1;
+      file.push(v);
+    }
+  }
+  for (let k = 0; k < n; k += 1) {
+    const i = k * 4;
+    if (!objet[k]) data[i + 3] = 0;
+    else if (profondeur[k] > 0) {
+      const opacite = Math.min(130, Math.round((255 - Math.max(data[i], data[i + 1], data[i + 2])) * 2.4));
+      data[i] = 45;
+      data[i + 1] = 38;
+      data[i + 2] = 30;
+      data[i + 3] = opacite;
+    }
+  }
+  return sharp(data, { raw: { width: w, height: h, channels: 4 } }).png().toBuffer();
+}
+
 fs.mkdirSync(path.join(SORTIE, "mascots"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "persos"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "decors"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "missions"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "avatars"), { recursive: true });
+fs.mkdirSync(path.join(SORTIE, "scenes"), { recursive: true });
+fs.mkdirSync(path.join(SORTIE, "objets"), { recursive: true });
 
 const dimensions = {};
 
@@ -176,6 +293,24 @@ for (const [prefixe, sortie, largeur] of DECORS) {
     .toFile(path.join(SORTIE, `${sortie}.webp`));
   dimensions[sortie] = [resultat.width, resultat.height];
   console.log(`✓ ${sortie}.webp ${resultat.width}×${resultat.height} ${(resultat.size / 1024).toFixed(0)} Ko`);
+}
+
+for (const [prefixe, ids] of PLANCHES) {
+  const source = trouver(prefixe);
+  const { width, height } = await sharp(source).metadata();
+  const cw = Math.floor(width / 3);
+  const ch = Math.floor(height / 3);
+  for (const [n, id] of ids.entries()) {
+    if (!id) continue;
+    const zone = { left: (n % 3) * cw, top: Math.floor(n / 3) * ch, width: cw, height: ch };
+    const caseImage = await sharp(source).extract(zone).png().toBuffer();
+    const resultat = await sharp(await detourerObjet(caseImage))
+      .trim({ threshold: 1 })
+      .resize({ width: 240, height: 240, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 82, alphaQuality: 90 })
+      .toFile(path.join(SORTIE, `objets/${id}.webp`));
+    console.log(`✓ objets/${id}.webp ${resultat.width}×${resultat.height} ${(resultat.size / 1024).toFixed(0)} Ko`);
+  }
 }
 
 // Avatars de Kofi et Awa : visage recadré depuis leur pose « salue », sur

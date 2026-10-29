@@ -228,7 +228,7 @@ export const SEUIL_COMPETENCE = 3;
 /* Missions                                                            */
 /* ------------------------------------------------------------------ */
 
-export const VILLAGE_MISSIONS: MissionContent[] = [
+const MISSIONS_DU_VILLAGE: MissionContent[] = [
   {
     id: "marche-adjoua",
     zoneId: "village-tri",
@@ -717,6 +717,13 @@ export const VILLAGE_MISSIONS: MissionContent[] = [
     vignette: "/illustrations/missions/objets-dangereux.webp",
   },
 ];
+
+/** Les déchets du village sont de vrais objets dessinés, posés dans un décor vide. */
+export const VILLAGE_MISSIONS: MissionContent[] = MISSIONS_DU_VILLAGE.map((m) => ({
+  ...m,
+  scene: `/illustrations/scenes/${m.id}.webp`,
+  objets: m.objets.map((o) => ({ ...o, image: `/illustrations/objets/${o.id}.webp` })),
+}));
 
 /* ------------------------------------------------------------------ */
 /* Défis du vrai monde                                                 */

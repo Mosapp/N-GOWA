@@ -46,6 +46,16 @@ function jouer(save: Sauvegarde, res: ResultatMission) {
 }
 
 describe("contenu des missions", () => {
+  it("les images des scènes et des objets à ramasser existent dans public/", () => {
+    for (const m of MISSIONS) {
+      if (m.scene) expect(existsSync(join(process.cwd(), "public", m.scene)), m.scene).toBe(true);
+      for (const o of m.objets) {
+        if (o.image) expect(existsSync(join(process.cwd(), "public", o.image)), o.image).toBe(true);
+      }
+    }
+    expect(MISSIONS.filter((m) => m.zoneId === "village-tri").every((m) => m.scene)).toBe(true);
+  });
+
   it("chaque mission a sa vignette illustrée, présente dans public/", () => {
     for (const m of MISSIONS) {
       expect(m.vignette, m.id).toBeDefined();

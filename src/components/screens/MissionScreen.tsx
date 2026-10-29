@@ -124,7 +124,7 @@ export function MissionScreen({
           bacs={mission.bacs[complexite]}
           complexite={complexite}
           consigne={mission.consigne[complexite]}
-          scene={vignetteDe(mission)}
+          scene={mission.scene ?? vignetteDe(mission)}
           onFinish={(r) => {
             setResultats(r);
             if (complexite === "grand") setPhase("question");

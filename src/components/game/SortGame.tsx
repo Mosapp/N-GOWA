@@ -22,20 +22,23 @@ type Retour =
 /**
  * Place les déchets sur la moitié basse de la scène, en rangées un peu
  * désordonnées (comme s'ils traînaient par terre). Déterministe : la même
- * liste donne toujours la même disposition.
+ * liste donne toujours la même disposition. `auSol` : décor vide dont le sol
+ * occupe le bas de l'image, les objets y sont posés plus bas.
  */
-function positions(n: number): { x: number; y: number }[] {
+function positions(n: number, auSol: boolean): { x: number; y: number; angle: number }[] {
   const colonnes = n <= 3 ? n : n <= 6 ? 3 : 4;
   const rangees = Math.ceil(n / colonnes);
+  const [haut, bas] = auSol ? [58, 86] : [44, 82];
   return Array.from({ length: n }, (_, i) => {
     const rangee = Math.floor(i / colonnes);
     const dansRangee = rangee === rangees - 1 ? n - rangee * colonnes : colonnes;
     const col = i % colonnes;
     const decalX = Math.sin(i * 12.9898) * 4;
-    const decalY = Math.cos(i * 78.233) * 3.5;
+    const decalY = Math.cos(i * 78.233) * 3;
     return {
-      x: ((col + 0.5) / dansRangee) * 84 + 8 + decalX,
-      y: rangees === 1 ? 66 + decalY : 44 + (rangee / (rangees - 1)) * 38 + decalY,
+      x: ((col + 0.5) / dansRangee) * 80 + 10 + decalX,
+      y: (rangees === 1 ? (haut + bas) / 2 : haut + (rangee / (rangees - 1)) * (bas - haut)) + decalY,
+      angle: Math.round(Math.sin(i * 4.1) * 14),
     };
   });
 }
@@ -81,7 +84,8 @@ export function SortGame({
   const bacRefs = useRef<Partial<Record<BacId, HTMLButtonElement | null>>>({});
   const glisse = useRef<{ x: number; y: number; id: number; objetId: string; bouge: boolean } | null>(null);
 
-  const [places] = useState(() => positions(objets.length));
+  const illustree = objets.every((o) => o.image);
+  const [places] = useState(() => positions(objets.length, illustree));
   const restants = objets.filter((o) => !ranges.includes(o.id));
   const enJeu = objets.filter((o) => !ranges.includes(o.id) || envols[o.id]);
   const objetChoisi = restants.find((o) => o.id === choisi) ?? restants[0] ?? null;
@@ -246,6 +250,11 @@ export function SortGame({
   // Plus gros sur tablette et PC, sans gêner les petits écrans.
   const base = objets.length > 6 ? 64 : 72;
   const tailleObjet = `clamp(${base}px, 11vw, ${Math.round(base * 1.3)}px)`;
+  // Objets dessinés : plus grands, et un peu plus petits au loin (perspective).
+  const tailleDessin = (y: number) => {
+    const p = 0.78 + ((y - 58) / 28) * 0.3;
+    return `clamp(${Math.round(84 * p)}px, ${(19 * p).toFixed(1)}vw, ${Math.round(124 * p)}px)`;
+  };
 
   return (
     <div className="flex min-h-[calc(100dvh-88px)] flex-col">
@@ -260,7 +269,7 @@ export function SortGame({
         <div className="absolute inset-0 overflow-hidden rounded-[2rem] border-4 border-white shadow-[0_6px_0_rgba(45,42,38,0.1)]">
           {/* eslint-disable-next-line @next/next/no-img-element -- illustration locale de la mission */}
           <img src={scene} alt="" className="h-full w-full object-cover" draggable={false} />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/10 to-white/45" />
+          {illustree ? null : <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/10 to-white/45" />}
         </div>
 
         <p
@@ -279,12 +288,12 @@ export function SortGame({
           return (
             <div
               key={o.id}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 ${tenu === o.id || envol ? "z-40" : "z-20"}`}
-              style={{ left: `${place.x}%`, top: `${place.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${place.x}%`, top: `${place.y}%`, zIndex: tenu === o.id || envol ? 60 : 20 + Math.round(place.y / 4) }}
             >
               <div
-                className={actif || envol ? "" : "anim-float"}
-                style={{ animationDelay: `${(i % 5) * -0.7}s` }}
+                className={o.image ? "" : actif || envol ? "" : "anim-float"}
+                style={o.image ? { transform: `rotate(${place.angle}deg)` } : { animationDelay: `${(i % 5) * -0.7}s` }}
               >
                 <button
                   key={secoue ? secousse.cle : "repos"}
@@ -310,11 +319,17 @@ export function SortGame({
                   }}
                   aria-pressed={actif}
                   aria-label={`${o.nom}. Glisse-le dans une poubelle, ou touche-le puis touche une poubelle.`}
-                  className={`flex touch-none select-none items-center justify-center rounded-full border-4 bg-white/95 ${
-                    actif ? "border-ng-yellow shadow-[0_0_0_5px_rgba(246,180,39,0.35),0_8px_0_rgba(45,42,38,0.18)]" : "border-white shadow-[0_6px_0_rgba(45,42,38,0.18)]"
+                  className={`flex touch-none select-none items-center justify-center ${
+                    o.image
+                      ? ""
+                      : `rounded-full border-4 bg-white/95 ${
+                          actif
+                            ? "border-ng-yellow shadow-[0_0_0_5px_rgba(246,180,39,0.35),0_8px_0_rgba(45,42,38,0.18)]"
+                            : "border-white shadow-[0_6px_0_rgba(45,42,38,0.18)]"
+                        }`
                   } ${secoue ? "anim-shake" : ""} cursor-grab active:cursor-grabbing`}
                   style={{
-                    fontSize: tailleObjet,
+                    fontSize: o.image ? tailleDessin(place.y) : tailleObjet,
                     width: "1em",
                     height: "1em",
                     ...(envol
@@ -326,9 +341,24 @@ export function SortGame({
                       : null),
                   }}
                 >
-                  <span style={{ fontSize: grand ? "0.56em" : "0.6em", lineHeight: 1 }} aria-hidden>
-                    {o.emoji}
-                  </span>
+                  {o.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- objet dessiné local
+                    <img
+                      src={o.image}
+                      alt=""
+                      draggable={false}
+                      className="pointer-events-none h-full w-full object-contain"
+                      style={{
+                        filter: actif
+                          ? "drop-shadow(0 0 2px #fff) drop-shadow(0 0 7px rgba(255,196,40,0.95))"
+                          : "drop-shadow(0 3px 2px rgba(45,30,20,0.3))",
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: grand ? "0.56em" : "0.6em", lineHeight: 1 }} aria-hidden>
+                      {o.emoji}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
