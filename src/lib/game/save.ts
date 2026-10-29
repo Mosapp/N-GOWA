@@ -13,7 +13,10 @@ export const SAVE_BACKUP_KEY = "ngowa.sauvegarde.illisible";
 export const LEGACY_PROFILE_KEY = "ngowa.profileId";
 export const SAVE_VERSION = 1;
 
-export const AVATAR_IDS = ["kofi", "awa", "elephant", "tortue", "calao", "papillon"] as const;
+export const AVATAR_IDS = [
+  "kofi", "awa", "moussa", "fatou", "yann", "aicha", "kouame", "ama",
+  "elephant", "tortue", "calao", "papillon", "chimpanze", "hippo",
+] as const;
 export type AvatarId = (typeof AVATAR_IDS)[number];
 
 export const TRANCHES: TrancheAge[] = ["4-5", "6-8", "9-10"];

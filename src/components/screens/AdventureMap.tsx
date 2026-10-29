@@ -77,9 +77,6 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                 <br />
                 <span className="text-ng-blue">{profil.pseudo}</span> <span aria-hidden>👋</span>
               </h1>
-              <p className="mt-2 text-base font-bold text-ng-ink/80 sm:text-lg">
-                Une mission de plus pour protéger la nature de chez nous !
-              </p>
               <div className="mt-4 max-w-xs">
                 <Btn size="md" sound="pop" onClick={jouer}>
                   <IconPlay size={22} /> {prochaine ? "Continuer l'aventure" : "Rejouer"}
@@ -263,9 +260,7 @@ function TempsDuJour({ save, now }: { save: Sauvegarde; now: number }) {
             / {Math.round(max / 60)} min
           </text>
         </svg>
-        <p className="flex-1 font-bold text-ng-muted">
-          Aujourd&apos;hui. Après le jeu, on bouge et on joue dehors !
-        </p>
+        <p className="flex-1 font-display text-lg text-ng-muted">Aujourd&apos;hui</p>
       </div>
       {jours.length ? (
         <>
@@ -304,7 +299,6 @@ function ProchainPin({ save, onClick }: { save: Sauvegarde; onClick: () => void 
       <div className="min-w-0 flex-1">
         <p className="font-display text-sm text-ng-muted">Prochain pin</p>
         <p className="font-display text-xl leading-tight">{pin.nom}</p>
-        <p className="mt-1 text-sm font-bold text-ng-muted">{pin.commentObtenir}</p>
         <div className="mt-2 flex items-center gap-2">
           <ProgressBar value={prog.actuel} max={prog.cible} color="bg-ng-yellow" height="h-2.5" label={`progression vers ${pin.nom}`} />
           <span className="font-display text-sm text-ng-muted">

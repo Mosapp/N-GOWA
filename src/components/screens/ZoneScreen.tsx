@@ -9,7 +9,7 @@ import { SECONDARY_CHARACTERS } from "@/content/characters";
 import type { MissionContent, ZoneId } from "@/content/types";
 import { vignetteDe } from "@/content/village";
 import { ZONE_BY_ID } from "@/content/zones";
-import { complexitePour, missionsDeZone, pointsZone, statutMission } from "@/lib/game/rules";
+import { missionsDeZone, pointsZone, statutMission } from "@/lib/game/rules";
 import type { Sauvegarde } from "@/lib/game/save";
 import type { StatutTemps } from "@/lib/game/screenTime";
 import { playTone, warmUpAudio } from "@/lib/audio";
@@ -29,7 +29,6 @@ export function ZoneScreen({
   const zone = ZONE_BY_ID[zoneId];
   const missions = missionsDeZone(zoneId);
   const [ouverte, setOuverte] = useState<MissionContent | null>(null);
-  const complexite = complexitePour(save.profil!.tranche);
   const peutJouer = statut?.etat === "libre" || statut?.etat === "bientot";
 
   return (
@@ -115,7 +114,6 @@ export function ZoneScreen({
         <MissionSheet
           mission={ouverte}
           save={save}
-          complexite={complexite}
           peutJouer={peutJouer}
           onClose={() => setOuverte(null)}
           onPlay={() => {
@@ -131,14 +129,12 @@ export function ZoneScreen({
 function MissionSheet({
   mission,
   save,
-  complexite,
   peutJouer,
   onClose,
   onPlay,
 }: {
   mission: MissionContent;
   save: Sauvegarde;
-  complexite: "petit" | "grand";
   peutJouer: boolean;
   onClose: () => void;
   onPlay: () => void;
@@ -175,10 +171,7 @@ function MissionSheet({
         <>
           <ul className="mt-4 grid gap-2">
             <Objectif emoji="💡" titre="J'apprends" texte={mission.objectif.japprends} />
-            <Objectif emoji="✋" titre="Je pratique" texte={mission.objectif.jepratique} />
-            {complexite === "grand" ? (
-              <Objectif emoji="🌍" titre="À quoi ça sert ?" texte={mission.objectif.pourquoi} />
-            ) : null}
+
           </ul>
           {record ? (
             <p className="mt-3 text-center font-bold text-ng-muted">

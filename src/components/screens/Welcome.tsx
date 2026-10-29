@@ -31,7 +31,7 @@ export function Welcome({
 }) {
   const message = pseudo
     ? `Te revoilà, ${pseudo} ! Ton aventure t'attend.`
-    : "Bienvenue à N'GOWA ! Je suis Awa, et voici Kofi. Ensemble, on va protéger la nature de chez nous !";
+    : "Bienvenue ! Je suis Awa, et voici Kofi. On protège la nature ensemble ?";
 
   return (
     <main className="relative flex min-h-[100dvh] flex-col overflow-hidden">

@@ -126,7 +126,7 @@ try {
   await page.getByText("La question d'Awa").waitFor();
   await repondreQuestion(page);
   await page.getByText("Mission réussie !").first().waitFor();
-  ok(await page.getByText("trouvés en réessayant").isVisible(), "le résultat distingue premier coup et persévérance");
+  ok(await page.getByText("en réessayant", { exact: true }).isVisible(), "le résultat distingue premier coup et persévérance");
   await page.getByRole("button", { name: "Continuer", exact: true }).click();
   await page.getByText("Défi du vrai monde").waitFor();
   await page.getByRole("button", { name: "Je relève le défi !" }).click();

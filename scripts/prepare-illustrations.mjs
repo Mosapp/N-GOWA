@@ -63,6 +63,19 @@ const DECORS = [
   ["Living_room_with_laundry_drying_", "missions/chasse-gaspillage", 960],
   ["Neighborhood_with_renewable_ener", "missions/soleil-ami", 960],
   ["Safe_home_electrical_practices_", "missions/electricite-sans-danger", 960],
+  // Avatars au choix (4ᵉ lot d'images) : portraits carrés, affichés en rond.
+  ["Boy_smiling_in_football_jersey_", "avatars/moussa", 320],
+  ["Girl_smiling_in_yellow_dress_", "avatars/fatou", 320],
+  ["Boy_smiling_portrait_", "avatars/yann", 320],
+  ["Child_smiling_in_portrait_", "avatars/aicha", 320],
+  ["Young_boy_smiling_", "avatars/kouame", 320],
+  ["Girl_smiling_in_purple_dress_", "avatars/ama", 320],
+  ["Baby_elephant_smiling_portrait_", "avatars/elephant", 320],
+  ["Smiling_turtle_looking_forward_", "avatars/tortue", 320],
+  ["Hornbill_bird_smiling_portrait_", "avatars/calao", 320],
+  ["Butterfly_smiling_", "avatars/papillon", 320],
+  ["Baby_chimpanzee_smiling_portrait_", "avatars/chimpanze", 320],
+  ["Pygmy_hippo_smiling_", "avatars/hippo", 320],
 ];
 
 // Plusieurs dossiers sources possibles (un par lot d'images), séparés par des virgules.
@@ -137,6 +150,7 @@ fs.mkdirSync(path.join(SORTIE, "mascots"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "persos"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "decors"), { recursive: true });
 fs.mkdirSync(path.join(SORTIE, "missions"), { recursive: true });
+fs.mkdirSync(path.join(SORTIE, "avatars"), { recursive: true });
 
 const dimensions = {};
 
@@ -162,6 +176,21 @@ for (const [prefixe, sortie, largeur] of DECORS) {
     .toFile(path.join(SORTIE, `${sortie}.webp`));
   dimensions[sortie] = [resultat.width, resultat.height];
   console.log(`✓ ${sortie}.webp ${resultat.width}×${resultat.height} ${(resultat.size / 1024).toFixed(0)} Ko`);
+}
+
+// Avatars de Kofi et Awa : visage recadré depuis leur pose « salue », sur
+// un fond pastel comme les autres portraits.
+const VISAGES = [
+  ["kofi", { left: 80, top: 0, width: 260, height: 260 }, "#FCD9BD"],
+  ["awa", { left: 25, top: 10, width: 280, height: 280 }, "#E4D6F5"],
+];
+for (const [id, zone, fond] of VISAGES) {
+  const visage = await sharp(path.join(SORTIE, `mascots/${id}-salue.webp`)).extract(zone).resize(320, 320).toBuffer();
+  const resultat = await sharp({ create: { width: 320, height: 320, channels: 3, background: fond } })
+    .composite([{ input: visage }])
+    .webp({ quality: 80 })
+    .toFile(path.join(SORTIE, `avatars/${id}.webp`));
+  console.log(`✓ avatars/${id}.webp ${(resultat.size / 1024).toFixed(0)} Ko`);
 }
 
 // Les dimensions affichées sont à reporter dans src/content/characters.ts.
