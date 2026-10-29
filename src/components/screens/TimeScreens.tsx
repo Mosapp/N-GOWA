@@ -94,7 +94,7 @@ export function PauseScreen({
 
 /** Fin de journée : on félicite, on ne culpabilise pas. */
 export function DayEndScreen({ pseudo, onParent }: { pseudo: string; onParent: () => void }) {
-  const message = `Bravo ${pseudo} ! Tu as bien joué aujourd'hui. Maintenant, va jouer dehors et essaie un geste pour la nature. À demain !`;
+  const message = `Bravo ${pseudo} ! Maintenant, on joue dehors. À demain !`;
   useDireAuMontage(message);
   return (
     <main className="relative flex min-h-[100dvh] flex-col overflow-hidden">

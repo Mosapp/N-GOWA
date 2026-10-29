@@ -108,7 +108,8 @@ export function MissionScreen({
       {phase === "intro" ? (
         <Intro
           titre={mission.titre}
-          histoire={mission.histoire[complexite]}
+          histoire={mission.histoire.petit}
+          histoireVoix={mission.histoire[complexite]}
           personnage={mission.personnageId}
           nomPerso={perso?.nom ?? ""}
           bacs={mission.bacs[complexite].map((b) => BACS[b].nom)}
@@ -192,6 +193,7 @@ export function MissionScreen({
 function Intro({
   titre,
   histoire,
+  histoireVoix,
   personnage,
   nomPerso,
   bacs,
@@ -200,13 +202,16 @@ function Intro({
 }: {
   vignette: string;
   titre: string;
+  /** Texte court affiché. */
   histoire: string;
+  /** Version lue à voix haute (plus détaillée pour les 6-10 ans). */
+  histoireVoix: string;
   personnage: string;
   nomPerso: string;
   bacs: string[];
   onPlay: () => void;
 }) {
-  useDireAuMontage(histoire);
+  useDireAuMontage(histoireVoix);
   return (
     <section className="anim-rise flex min-h-[calc(100dvh-100px)] flex-col">
       <div className="relative overflow-hidden rounded-[2rem] shadow-lg">
@@ -220,7 +225,7 @@ function Intro({
         <Mascot id="kofi" pose="montre" size={130} />
       </div>
       <div className="mt-4">
-        <SpeechBubble qui={nomPerso} texteVoix={histoire}>
+        <SpeechBubble qui={nomPerso} texteVoix={histoireVoix}>
           <p>{histoire}</p>
         </SpeechBubble>
       </div>
@@ -339,12 +344,13 @@ function Resultat({
 }) {
   const premierCoup = resultats.filter((r) => r.essais === 1).length;
   const perseverance = resultats.length - premierCoup;
+  // Le message est dit à voix haute ; à l'écran, on garde l'essentiel.
   const message =
     bilan.etoiles === 3
-      ? "Mission réussie ! Tu es un vrai champion de la nature."
+      ? `Mission réussie ! Tu es un vrai champion de la nature. ${pourquoi}`
       : perseverance > 0
-        ? "Mission réussie ! Tu t'es trompé parfois, mais tu n'as pas abandonné. C'est comme ça qu'on apprend !"
-        : "Mission réussie, bravo !";
+        ? `Mission réussie ! Tu n'as pas abandonné, bravo. ${pourquoi}`
+        : `Mission réussie, bravo ! ${pourquoi}`;
   useDireAuMontage(message);
 
   return (
@@ -353,35 +359,22 @@ function Resultat({
       <Mascot id="kofi" size={150} humeur="joie" />
       <Stars count={bilan.etoiles} size={46} />
       <h1 className="mt-2 font-display text-3xl">Mission réussie !</h1>
-      <div className="mt-3 w-full text-left">
-        <SpeechBubble qui="Kofi" texteVoix={message}>
-          <p>{message}</p>
-        </SpeechBubble>
-      </div>
 
-      <div className="mt-4 grid w-full grid-cols-2 gap-3">
-        <div className="card-ng p-3">
-          <p className="font-display text-3xl text-ng-green">{premierCoup}</p>
-          <p className="font-bold text-ng-muted">trouvés du premier coup</p>
+      <div className="mt-4 flex w-full items-stretch justify-center gap-3">
+        <div className="flex flex-1 flex-col items-center justify-center rounded-3xl bg-ng-sun-soft p-3">
+          <p className="font-display text-3xl">+{bilan.points}</p>
+          <p className="font-display text-sm text-ng-muted">points</p>
         </div>
-        <div className="card-ng p-3">
-          <p className="font-display text-3xl text-ng-earth">{perseverance}</p>
-          <p className="font-bold text-ng-muted">trouvés en réessayant</p>
+        <div className="flex flex-1 flex-col items-center justify-center rounded-3xl bg-ng-leaf-soft p-3" aria-label={`${premierCoup} du premier coup`}>
+          <p className="font-display text-3xl text-ng-green">✓ {premierCoup}</p>
+          <p className="font-display text-sm text-ng-muted">du 1er coup</p>
         </div>
-      </div>
-
-      <div className="mt-3 w-full rounded-3xl bg-ng-sun-soft p-4">
-        <p className="font-display text-2xl">+{bilan.points} points dans cette partie</p>
-        <p className="font-bold text-ng-muted">
-          {bilan.gain > 0
-            ? `Ton total augmente de ${bilan.gain} points.`
-            : "Ton meilleur score sur cette mission reste le même : entraîne-toi pour le battre !"}
-        </p>
-      </div>
-
-      <div className="mt-3 w-full rounded-3xl bg-white p-4 text-left">
-        <p className="font-display text-lg">🌍 Pourquoi c&apos;est utile ?</p>
-        <p className="mt-1 font-bold">{pourquoi}</p>
+        {perseverance ? (
+          <div className="flex flex-1 flex-col items-center justify-center rounded-3xl bg-white p-3" aria-label={`${perseverance} en réessayant`}>
+            <p className="font-display text-3xl text-ng-earth">↻ {perseverance}</p>
+            <p className="font-display text-sm text-ng-muted">en réessayant</p>
+          </div>
+        ) : null}
       </div>
 
       {bilan.competencesDemontrees.length ? (
@@ -411,7 +404,7 @@ function Resultat({
 
       {tempsFini ? (
         <p className="mt-4 w-full rounded-2xl bg-ng-water-soft p-3 font-display text-lg">
-          🌅 Belle fin de mission ! C&apos;est maintenant l&apos;heure de faire une pause.
+          🌅 C&apos;est l&apos;heure de la pause !
         </p>
       ) : null}
 
@@ -439,7 +432,7 @@ function DefiPropose({
 }) {
   const defi = DEFI_BY_ID[defiId];
   const consigne = defi.consigne[petit ? "petit" : "grand"];
-  useDireAuMontage(`Défi du vrai monde. ${consigne}`);
+  useDireAuMontage(`Défi du vrai monde. ${consigne} ${defi.pourquoi}`);
   return (
     <section className="anim-rise flex flex-col items-center text-center">
       <Mascot id="awa" pose="explique" size={170} />
@@ -453,12 +446,8 @@ function DefiPropose({
           <p>{consigne}</p>
         </SpeechBubble>
       </div>
-      <div className="mt-3 w-full rounded-3xl bg-white p-4 text-left">
-        <p className="font-bold">🌍 {defi.pourquoi}</p>
-        <p className="mt-2 font-bold text-ng-coral-dark">⚠️ {defi.securite}</p>
-      </div>
-      <p className="mt-3 font-bold text-ng-muted">
-        Pas de photo à envoyer. Quand tu l&apos;as fait, un adulte pourra le valider.
+      <p className="mt-3 w-full rounded-2xl bg-ng-coral-soft px-4 py-2 text-left font-bold text-ng-coral-dark">
+        ⚠️ {defi.securite}
       </p>
       <div className="mt-5 grid w-full gap-2">
         <Btn size="lg" sound="none" onClick={onAccept}>
