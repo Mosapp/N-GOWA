@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "node scripts/e2e-parcours.mjs",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "illustrations": "node scripts/prepare-illustrations.mjs"
   },
   "dependencies": {
     "next": "16.2.6",

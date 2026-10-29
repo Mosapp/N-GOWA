@@ -10,6 +10,7 @@ export function Bin({
   ouvert?: boolean;
   size?: number;
 }) {
+  if (bac.forme === "panneau") return <Panneau bac={bac} ouvert={ouvert} size={size} />;
   return (
     <svg
       width={size}
@@ -46,6 +47,30 @@ export function Bin({
       >
         <rect x="11" y="24" width="78" height="12" rx="6" fill={bac.couleurFoncee} />
         <rect x="40" y="17" width="20" height="9" rx="4.5" fill="none" stroke={bac.couleurFoncee} strokeWidth="4" />
+      </g>
+    </svg>
+  );
+}
+
+/** Panneau en bois peint (pour classer des gestes plutôt que des objets). */
+function Panneau({ bac, ouvert, size }: { bac: BacContent; ouvert: boolean; size: number }) {
+  return (
+    <svg width={size} height={size * 1.1} viewBox="0 0 100 110" aria-hidden style={{ overflow: "visible" }}>
+      <ellipse cx="50" cy="104" rx="26" ry="4.5" fill="rgba(45,42,38,0.14)" />
+      <rect x="45" y="60" width="10" height="44" rx="3" fill="#9C6B3F" />
+      <g
+        style={{
+          transformOrigin: "50px 60px",
+          transform: ouvert ? "scale(1.08) rotate(-3deg)" : "none",
+          transition: "transform 160ms ease-out",
+        }}
+      >
+        <rect x="8" y="10" width="84" height="62" rx="18" fill={bac.couleur} stroke={bac.couleurFoncee} strokeWidth="3.5" />
+        <rect x="14" y="15" width="72" height="10" rx="5" fill="rgba(255,255,255,0.22)" />
+        <g transform="translate(50 43)">
+          <circle r="21" fill="rgba(255,255,255,0.94)" />
+          <Picto picto={bac.picto} couleur={bac.couleurFoncee} />
+        </g>
       </g>
     </svg>
   );
@@ -101,6 +126,54 @@ function Picto({ picto, couleur }: { picto: BacContent["picto"]; couleur: string
           <path d="M10 -2 A 10 10 0 0 1 -8 6" />
           <path d="M3 -10 l6 4 -5 5" />
           <path d="M-3 10 l-6 -4 5 -5" />
+        </g>
+      );
+    case "goutte":
+      return (
+        <path
+          d="M0 -14 C 6 -6, 10 -1, 10 4 A 10 10 0 0 1 -10 4 C -10 -1, -6 -6, 0 -14 Z"
+          {...trait}
+          fill={couleur}
+          fillOpacity={0.2}
+        />
+      );
+    case "goutte-barree":
+      return (
+        <g {...trait}>
+          <path d="M0 -14 C 6 -6, 10 -1, 10 4 A 10 10 0 0 1 -10 4 C -10 -1, -6 -6, 0 -14 Z" fill={couleur} fillOpacity={0.12} />
+          <path d="M-12 -12 L 12 12" />
+        </g>
+      );
+    case "poisson":
+      return (
+        <g {...trait}>
+          <path d="M-11 0 C -5 -9, 6 -9, 10 0 C 6 9, -5 9, -11 0 Z" fill={couleur} fillOpacity={0.15} />
+          <path d="M-11 0 L -15 -6 M -11 0 L -15 6" />
+          <circle cx="5" cy="-2" r="1.2" fill={couleur} />
+        </g>
+      );
+    case "nuage-sale":
+      return (
+        <g {...trait}>
+          <path d="M-11 4 a 6 6 0 0 1 2 -11 a 8 8 0 0 1 15 1 a 5 5 0 0 1 4 10 z" fill={couleur} fillOpacity={0.3} />
+          <path d="M-6 9 v4 M 0 9 v6 M 6 9 v4" />
+        </g>
+      );
+    case "plante":
+      return (
+        <g {...trait}>
+          <path d="M0 13 V -2" />
+          <path d="M0 2 C -10 2, -12 -8, -10 -12 C -4 -12, 0 -6, 0 2 Z" fill={couleur} fillOpacity={0.2} />
+          <path d="M0 -1 C 9 -1, 12 -9, 10 -13 C 4 -13, 0 -8, 0 -1 Z" fill={couleur} fillOpacity={0.2} />
+        </g>
+      );
+    case "plante-barree":
+      return (
+        <g {...trait}>
+          <path d="M0 13 V -2" />
+          <path d="M0 2 C -10 2, -12 -8, -10 -12 C -4 -12, 0 -6, 0 2 Z" fill={couleur} fillOpacity={0.12} />
+          <path d="M0 -1 C 9 -1, 12 -9, 10 -13 C 4 -13, 0 -8, 0 -1 Z" fill={couleur} fillOpacity={0.12} />
+          <path d="M-13 -13 L 13 13" />
         </g>
       );
     case "poubelle":

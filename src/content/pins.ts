@@ -4,8 +4,10 @@ import type { PinContent } from "./types";
  * Pins écologiques, inspirés des badges scouts.
  *
  * Les seuils sont CONFIGURABLES ici et devront être équilibrés après des
- * tests avec des enfants. Les seuils de points du cahier des charges
- * (200 / 400 / 600 / 800 / 1000) sont repris tels quels.
+ * tests avec des enfants. Les seuils du cahier des charges (200 / 400 / 600 /
+ * 800 / 1000) servent de base ; « Gardien de l'Eau » est ramené à 150 points
+ * dans la Rivière Vivante, qui compte 3 missions (contre 4 au Village), pour
+ * rester atteignable par les 4-5 ans.
  *
  * Un pin de pilier demande aussi d'avoir joué dans la zone correspondante :
  * on ne peut pas devenir « Gardien de l'Eau » en ne triant que des déchets.
@@ -45,11 +47,11 @@ export const PINS: PinContent[] = [
     id: "gardien-eau",
     nom: "Gardien de l'Eau",
     description: "Tu sais éviter le gaspillage d'eau.",
-    commentObtenir: "400 points et des missions dans la Rivière Vivante (bientôt).",
+    commentObtenir: "Gagne 150 points dans la Rivière Vivante.",
     couleur: "#1A6FA8",
     couleurFoncee: "#0F4670",
     embleme: "goutte",
-    regle: { type: "points-total", seuil: 400, zoneRequise: "riviere-vivante" },
+    regle: { type: "points-zone", zoneId: "riviere-vivante", seuil: 150 },
   },
   {
     id: "ami-nature",

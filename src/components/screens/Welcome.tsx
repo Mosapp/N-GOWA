@@ -30,7 +30,7 @@ export function Welcome({
   onStart: () => void;
 }) {
   const message = pseudo
-    ? `Te revoilà, ${pseudo} ! Le Village du Tri t'attend.`
+    ? `Te revoilà, ${pseudo} ! Ton aventure t'attend.`
     : "Bienvenue à N'GOWA ! Je suis Awa, et voici Kofi. Ensemble, on va protéger la nature de chez nous !";
 
   return (

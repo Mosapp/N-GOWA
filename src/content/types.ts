@@ -104,7 +104,10 @@ export type CompetenceId =
   | "trier-verre"
   | "trier-restes"
   | "reperer-danger"
-  | "reutiliser";
+  | "reutiliser"
+  | "economiser-eau"
+  | "proteger-eau"
+  | "reutiliser-eau";
 
 export type BacId =
   | "plastique"
@@ -113,7 +116,13 @@ export type BacId =
   | "restes"
   | "danger"
   | "reutiliser"
-  | "trier";
+  | "trier"
+  | "economise"
+  | "gaspille"
+  | "protege"
+  | "pollue"
+  | "plantes-oui"
+  | "plantes-non";
 
 export type BacContent = {
   id: BacId;
@@ -121,7 +130,22 @@ export type BacContent = {
   couleur: string;
   couleurFoncee: string;
   /** Pictogramme dessiné sur le bac (voir components/art/Bin). */
-  picto: "bouteille" | "feuille-papier" | "bocal" | "epluchure" | "main" | "boucle" | "poubelle";
+  picto:
+    | "bouteille"
+    | "feuille-papier"
+    | "bocal"
+    | "epluchure"
+    | "main"
+    | "boucle"
+    | "poubelle"
+    | "goutte"
+    | "goutte-barree"
+    | "poisson"
+    | "nuage-sale"
+    | "plante"
+    | "plante-barree";
+  /** "poubelle" pour trier des objets, "panneau" pour classer des gestes. */
+  forme?: "poubelle" | "panneau";
 };
 
 export type ObjetATrier = {
@@ -162,8 +186,8 @@ export type MissionContent = {
   /** Question de compréhension, uniquement pour les 6-10 ans. */
   question: QuestionMission;
   defiId: string;
-  /** Vignette illustrée de la mission. */
-  vignette: string;
+  /** Vignette illustrée de la mission (sinon, le décor de la zone). */
+  vignette?: string;
 };
 
 export type DefiReelContent = {

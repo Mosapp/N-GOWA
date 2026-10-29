@@ -59,9 +59,33 @@ export type SecondaryCharacter = {
   emoji: string;
   couleur: string;
   portrait: string;
+  /** Cadrage du portrait dans le médaillon (object-position CSS) et zoom. */
+  cadrage?: string;
+  zoom?: number;
 };
 
 export const SECONDARY_CHARACTERS: Record<string, SecondaryCharacter> = {
+  // Kofi et Awa guident aussi certaines missions (Rivière Vivante).
+  awa: {
+    id: "awa",
+    portrait: "/illustrations/mascots/awa-explique.webp",
+    cadrage: "50% 4%",
+    zoom: 1.9,
+    nom: "Awa",
+    role: "Guide de la nature",
+    emoji: "👧🏾",
+    couleur: "#7A4BC0",
+  },
+  kofi: {
+    id: "kofi",
+    portrait: "/illustrations/mascots/kofi-montre.webp",
+    cadrage: "38% 4%",
+    zoom: 1.9,
+    nom: "Kofi",
+    role: "Jeune explorateur",
+    emoji: "👦🏾",
+    couleur: "#E0762E",
+  },
   adjoua: {
     id: "adjoua",
     portrait: "/illustrations/persos/adjoua.webp",

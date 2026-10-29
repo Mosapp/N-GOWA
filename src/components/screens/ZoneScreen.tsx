@@ -7,6 +7,7 @@ import type { Naviguer } from "@/components/navigation";
 import { Btn, CharacterMedallion, Illustration, ScreenHeader, Sheet, SpeechBubble, Stars } from "@/components/ui";
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import type { MissionContent, ZoneId } from "@/content/types";
+import { vignetteDe } from "@/content/village";
 import { ZONE_BY_ID } from "@/content/zones";
 import { complexitePour, missionsDeZone, pointsZone, statutMission } from "@/lib/game/rules";
 import type { Sauvegarde } from "@/lib/game/save";
@@ -152,7 +153,7 @@ function MissionSheet({
 
   return (
     <Sheet label={mission.titre} onClose={onClose}>
-      <Illustration src={mission.vignette} ratio="16 / 9" className="mb-4 rounded-3xl" />
+      <Illustration src={vignetteDe(mission)} ratio="16 / 9" className="mb-4 rounded-3xl" />
       <div className="flex items-center gap-3">
         <CharacterMedallion id={mission.personnageId} size={72} />
         <div>

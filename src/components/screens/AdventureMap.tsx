@@ -8,6 +8,7 @@ import { IconCheck, IconLock, IconPlay, IconStar } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
 import { Avatar, Btn, CharacterMedallion, DecorFond, DECORS, Illustration, Mascot, ProgressBar, Sheet, SpeechBubble } from "@/components/ui";
 import { THEME_BY_ID } from "@/content/curriculum";
+import { vignetteDe } from "@/content/village";
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import type { ZoneContent } from "@/content/types";
 import { ZONE_BY_ID, ZONES } from "@/content/zones";
@@ -46,7 +47,7 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
   };
   const ouvrirZone = (zone: ZoneContent) => {
     playTone("pop");
-    if (statutZone(zone.id) === "ouverte") naviguer({ nom: "zone", zoneId: zone.id });
+    if (statutZone(save, zone.id) === "ouverte") naviguer({ nom: "zone", zoneId: zone.id });
     else setBientot(zone);
   };
 
@@ -77,7 +78,7 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                 <span className="text-ng-blue">{profil.pseudo}</span> <span aria-hidden>👋</span>
               </h1>
               <p className="mt-2 text-base font-bold text-ng-ink/80 sm:text-lg">
-                Une mission de plus pour un quartier tout propre !
+                Une mission de plus pour protéger la nature de chez nous !
               </p>
               <div className="mt-4 max-w-xs">
                 <Btn size="md" sound="pop" onClick={jouer}>
@@ -102,7 +103,7 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                   <IconCheck size={28} />
                 </span>
                 <p className="font-display text-lg">
-                  Tu as terminé tout le Village du Tri ! Rejoue pour gagner plus d&apos;étoiles.
+                  Tu as terminé toutes les missions disponibles ! Rejoue pour gagner plus d&apos;étoiles. De nouvelles zones arrivent bientôt.
                 </p>
               </div>
             )}
@@ -116,15 +117,17 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
             <h2 className="mb-2 font-display text-2xl">Les quatre mondes</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {ZONES.map((zone) => {
-                const ouverte = statutZone(zone.id) === "ouverte";
+                const statutZ = statutZone(save, zone.id);
+                const ouverte = statutZ === "ouverte";
                 const prog = progressionZone(save, zone.id);
+                const etiquette = statutZ === "verrouillee" ? "À débloquer" : "Bientôt";
                 return (
                   <button
                     key={zone.id}
                     type="button"
                     onClick={() => ouvrirZone(zone)}
                     className="relative flex min-h-[150px] flex-col items-start justify-end gap-1 overflow-hidden rounded-3xl p-3 text-left shadow-[0_6px_18px_rgba(26,79,122,0.10)] transition-transform hover:-translate-y-0.5"
-                    aria-label={ouverte ? `${zone.nom} : ${prog.terminees} missions sur ${prog.total}` : `${zone.nom} : bientôt`}
+                    aria-label={ouverte ? `${zone.nom} : ${prog.terminees} missions sur ${prog.total}` : `${zone.nom} : ${etiquette.toLowerCase()}`}
                   >
                     <DecorFond
                       src={zone.decor}
@@ -139,7 +142,7 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                     </span>
                     <span className="relative font-display text-lg leading-tight text-white">{NOMS_COURTS[zone.pilier]}</span>
                     <span className="relative text-sm font-bold text-white/90">
-                      {ouverte ? `${prog.terminees}/${prog.total} missions` : "Bientôt"}
+                      {ouverte ? `${prog.terminees}/${prog.total} missions` : etiquette}
                     </span>
                   </button>
                 );
@@ -155,15 +158,17 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                 <MapScene />
                 {ZONES.map((zone) => {
                   const pos = MAP_POSITIONS[zone.id];
-                  const ouverte = statutZone(zone.id) === "ouverte";
+                  const statutZ = statutZone(save, zone.id);
+                  const ouverte = statutZ === "ouverte";
                   const prog = progressionZone(save, zone.id);
+                  const ici = (prochaine?.zoneId ?? "village-tri") === zone.id;
                   return (
                     <div
                       key={zone.id}
                       className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
                       style={{ left: `${(pos.x / MAP_VIEWBOX.w) * 100}%`, top: `${(pos.y / MAP_VIEWBOX.h) * 100}%` }}
                     >
-                      {ouverte ? (
+                      {ici ? (
                         <div className="anim-float absolute -top-14" aria-hidden>
                           <Avatar id={profil.avatar} size={48} />
                         </div>
@@ -175,7 +180,9 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                         aria-label={
                           ouverte
                             ? `${zone.nom} : ${prog.terminees} missions sur ${prog.total} terminées`
-                            : `${zone.nom} : bientôt disponible`
+                            : statutZ === "verrouillee"
+                              ? `${zone.nom} : à débloquer`
+                              : `${zone.nom} : bientôt disponible`
                         }
                       >
                         <span
@@ -193,7 +200,9 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
                               <IconStar size={16} /> {prog.etoiles}/{prog.etoilesMax} · {prog.terminees}/{prog.total}
                             </span>
                           ) : (
-                            <span className="block font-display text-sm text-ng-muted">Bientôt</span>
+                            <span className="block font-display text-sm text-ng-muted">
+                              {statutZ === "verrouillee" ? "À débloquer" : "Bientôt"}
+                            </span>
                           )}
                         </span>
                       </button>
@@ -219,20 +228,15 @@ export function AdventureMap({ save, naviguer, now }: { save: Sauvegarde; navigu
               <p className="mt-1 font-bold text-ng-muted">{bientot.accroche}</p>
             </div>
           </div>
-          <div className="mt-4">
-            <SpeechBubble qui="Awa" color="#7A4BC0" texteVoix="Cette zone n'est pas encore prête. On la prépare pour toi ! En attendant, le Village du Tri t'attend.">
-              <p>Cette zone n&apos;est pas encore prête. On la prépare pour toi ! En attendant, le Village du Tri t&apos;attend.</p>
-            </SpeechBubble>
-          </div>
-          <div className="mt-5 grid gap-2">
-            <Btn
-              onClick={() => {
-                setBientot(null);
-                naviguer({ nom: "zone", zoneId: "village-tri" });
-              }}
-            >
-              Aller au Village du Tri
-            </Btn>
+          <ZoneFermee
+            save={save}
+            zone={bientot}
+            onGo={(zoneId) => {
+              setBientot(null);
+              naviguer({ nom: "zone", zoneId });
+            }}
+          />
+          <div className="mt-2 grid gap-2">
             <Btn variant="white" onClick={() => setBientot(null)}>
               Fermer
             </Btn>
@@ -254,7 +258,7 @@ function ContinuerCarte({ save, missionId, onPlay }: { save: Sauvegarde; mission
   return (
     <div className="card-ng flex flex-wrap items-center gap-4 p-3 sm:flex-nowrap sm:p-4" data-mission={missionId}>
       <div className="relative w-full shrink-0 sm:w-48">
-        <Illustration src={mission.vignette} ratio="16 / 10" className="rounded-2xl" />
+        <Illustration src={vignetteDe(mission)} ratio="16 / 10" className="rounded-2xl" />
         <div className="absolute -bottom-3 -right-2">
           <CharacterMedallion id={mission.personnageId} size={52} />
         </div>
@@ -384,5 +388,34 @@ function DefiEnCours({ save, onClick }: { save: Sauvegarde; onClick: () => void 
         </span>
       </span>
     </button>
+  );
+}
+
+/** Message d'une zone pas encore ouverte : à débloquer, ou pas encore prête. */
+function ZoneFermee({
+  save,
+  zone,
+  onGo,
+}: {
+  save: Sauvegarde;
+  zone: ZoneContent;
+  onGo: (zoneId: ZoneContent["id"]) => void;
+}) {
+  const verrouillee = statutZone(save, zone.id) === "verrouillee";
+  const index = ZONES.findIndex((z) => z.id === zone.id);
+  const precedente = ZONES[index - 1];
+  const cible = verrouillee && precedente ? precedente : ZONE_BY_ID[prochaineMission(save)?.zoneId ?? "village-tri"];
+  const texte = verrouillee
+    ? `Pour ouvrir ${zone.nom}, termine d'abord toutes les missions de ${precedente?.nom ?? "la zone d'avant"} !`
+    : `Cette zone n'est pas encore prête. On la prépare pour toi ! En attendant, ${cible.nom} t'attend.`;
+  return (
+    <div className="mt-4">
+      <SpeechBubble qui="Awa" color="#7A4BC0" texteVoix={texte}>
+        <p>{texte}</p>
+      </SpeechBubble>
+      <div className="mt-5">
+        <Btn onClick={() => onGo(cible.id)}>Aller à {cible.nom}</Btn>
+      </div>
+    </div>
   );
 }

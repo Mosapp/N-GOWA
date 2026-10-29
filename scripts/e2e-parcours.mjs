@@ -88,8 +88,8 @@ async function repondreQuestion(page) {
   await page.getByRole("button", { name: "Voir mon résultat" }).click();
 }
 
-async function lancerMission(page, numero) {
-  await page.getByRole("button", { name: /^Le Village du Tri/ }).first().click();
+async function lancerMission(page, numero, zone = /^Le Village du Tri/) {
+  await page.getByRole("button", { name: zone }).first().click();
   await page.getByRole("button", { name: new RegExp(`^Mission ${numero} :`) }).click();
   await page.getByRole("button", { name: /^(Jouer !|Rejouer)$/ }).click();
   await page.getByRole("button", { name: /prêt/ }).click();
@@ -230,6 +230,10 @@ try {
   const ctxPetit = await browser.newContext({ ...devices["Pixel 5"] });
   const petit = await ctxPetit.newPage();
   await creerProfil(petit, /4 ou 5 ans/);
+  ok(
+    await petit.getByRole("button", { name: "La Rivière Vivante : à débloquer" }).first().isVisible(),
+    "la Rivière Vivante est à débloquer au départ",
+  );
   await lancerMission(petit, 1);
   ok((await petit.getByRole("button", { name: /^Mettre « / }).count()) === 3, "4-5 ans : trois bacs");
   const p = await jouerTri(petit, { glisser: false });
@@ -237,6 +241,41 @@ try {
   await petit.getByText("Mission réussie !").first().waitFor();
   ok(true, "4-5 ans : pas de question écrite, résultat direct");
   await ctxPetit.close();
+
+  /* ---------------------------- Rivière Vivante ---------------------------- */
+  console.log("Rivière Vivante");
+  const ctxRiv = await browser.newContext({ ...devices["Pixel 5"] });
+  const riv = await ctxRiv.newPage();
+  await creerProfil(riv, /9 ou 10 ans/);
+  await riv.evaluate((k) => {
+    const s = JSON.parse(localStorage.getItem(k));
+    const iso = new Date().toISOString();
+    for (const id of ["marche-adjoua", "cour-ecole", "seconde-vie", "objets-dangereux"]) {
+      s.missions[id] = { meilleursPoints: 80, meilleuresEtoiles: 2, parties: 1, terminee: true, derniereFois: iso };
+    }
+    localStorage.setItem(k, JSON.stringify(s));
+  }, SAVE_KEY);
+  await riv.reload();
+  await riv.getByRole("button", { name: "Continuer l'aventure" }).first().click();
+  ok(
+    await riv.getByRole("button", { name: /^La Rivière Vivante : 0 missions sur 3/ }).first().isVisible(),
+    "la Rivière Vivante s'ouvre après le Village",
+  );
+  await lancerMission(riv, 1, /^La Rivière Vivante/);
+  ok(
+    (await riv.getByRole("button", { name: /^Mettre « .* : (Économise|Gaspille) l'eau$/ }).count()) === 2,
+    "mission eau : deux panneaux (économise / gaspille)",
+  );
+  const r = await jouerTri(riv, { glisser: true });
+  ok(r.objets === 7, "mission eau : 7 gestes classés");
+  await riv.getByText("La question d'Awa").waitFor();
+  await repondreQuestion(riv);
+  await riv.getByRole("button", { name: "Continuer", exact: true }).click();
+  ok(await riv.getByRole("heading", { name: /Le robinet bien fermé/ }).isVisible(), "défi réel « robinet bien fermé » proposé");
+  await riv.getByRole("button", { name: "Je relève le défi !" }).click();
+  const saveRiv = await lireSave(riv);
+  ok(saveRiv.missions["chaque-goutte"]?.terminee, "mission de la Rivière enregistrée");
+  await ctxRiv.close();
 
   console.log(`\n${etapes} vérifications réussies.`);
 } finally {

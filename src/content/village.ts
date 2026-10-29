@@ -5,6 +5,8 @@ import type {
   DefiReelContent,
   MissionContent,
 } from "./types";
+import { RIVIERE_DEFIS, RIVIERE_MISSIONS } from "./riviere";
+import { ZONE_BY_ID } from "./zones";
 
 /* ------------------------------------------------------------------ */
 /* Les bacs du Village du Tri                                          */
@@ -62,6 +64,55 @@ export const BACS: Record<BacId, BacContent> = {
     couleurFoncee: "#3E474E",
     picto: "poubelle",
   },
+  // --- Rivière Vivante : panneaux pour classer des gestes ---
+  economise: {
+    id: "economise",
+    nom: "Économise l'eau",
+    couleur: "#1A6FA8",
+    couleurFoncee: "#114F7A",
+    picto: "goutte",
+    forme: "panneau",
+  },
+  gaspille: {
+    id: "gaspille",
+    nom: "Gaspille l'eau",
+    couleur: "#C9432C",
+    couleurFoncee: "#9E3220",
+    picto: "goutte-barree",
+    forme: "panneau",
+  },
+  protege: {
+    id: "protege",
+    nom: "Protège la rivière",
+    couleur: "#237A44",
+    couleurFoncee: "#175A31",
+    picto: "poisson",
+    forme: "panneau",
+  },
+  pollue: {
+    id: "pollue",
+    nom: "Pollue la rivière",
+    couleur: "#5B6770",
+    couleurFoncee: "#3E474E",
+    picto: "nuage-sale",
+    forme: "panneau",
+  },
+  "plantes-oui": {
+    id: "plantes-oui",
+    nom: "Bonne pour les plantes",
+    couleur: "#237A44",
+    couleurFoncee: "#175A31",
+    picto: "plante",
+    forme: "panneau",
+  },
+  "plantes-non": {
+    id: "plantes-non",
+    nom: "Pas pour les plantes",
+    couleur: "#8A5A2B",
+    couleurFoncee: "#5E3B1B",
+    picto: "plante-barree",
+    forme: "panneau",
+  },
 };
 
 export const COMPETENCES: Record<CompetenceId, { nom: string; emoji: string }> = {
@@ -71,6 +122,9 @@ export const COMPETENCES: Record<CompetenceId, { nom: string; emoji: string }> =
   "trier-restes": { nom: "Je mets les épluchures à part", emoji: "🍌" },
   "reperer-danger": { nom: "Je repère les objets dangereux", emoji: "🔋" },
   reutiliser: { nom: "Je donne une seconde vie aux objets", emoji: "♻️" },
+  "economiser-eau": { nom: "Je reconnais les gestes qui économisent l'eau", emoji: "🚰" },
+  "proteger-eau": { nom: "Je sais comment protéger la rivière", emoji: "🐟" },
+  "reutiliser-eau": { nom: "Je sais quelle eau peut arroser les plantes", emoji: "🌱" },
 };
 
 /** Nombre de bonnes réponses du premier coup pour qu'une compétence soit démontrée. */
@@ -575,7 +629,7 @@ export const VILLAGE_MISSIONS: MissionContent[] = [
 /* Aucun défi ne demande de photo, de vidéo ni de localisation.        */
 /* ------------------------------------------------------------------ */
 
-export const DEFIS_REELS: DefiReelContent[] = [
+const VILLAGE_DEFIS: DefiReelContent[] = [
   {
     id: "expliquer-tri",
     zoneId: "village-tri",
@@ -626,14 +680,23 @@ export const DEFIS_REELS: DefiReelContent[] = [
   },
 ];
 
+/** Tous les défis du vrai monde, toutes zones confondues. */
+export const DEFIS_REELS: DefiReelContent[] = [...VILLAGE_DEFIS, ...RIVIERE_DEFIS];
+
+/** Toutes les missions jouables, toutes zones confondues. */
+export const MISSIONS: MissionContent[] = [...VILLAGE_MISSIONS, ...RIVIERE_MISSIONS];
+
 export const DEFI_BY_ID = Object.fromEntries(DEFIS_REELS.map((d) => [d.id, d])) as Record<
   string,
   DefiReelContent
 >;
 
-export const MISSION_BY_ID = Object.fromEntries(
-  VILLAGE_MISSIONS.map((m) => [m.id, m]),
-) as Record<string, MissionContent>;
+export const MISSION_BY_ID = Object.fromEntries(MISSIONS.map((m) => [m.id, m])) as Record<
+  string,
+  MissionContent
+>;
 
-/** Toutes les missions jouables, toutes zones confondues (aujourd'hui : le Village). */
-export const MISSIONS: MissionContent[] = VILLAGE_MISSIONS;
+/** Vignette d'une mission, ou à défaut le décor de sa zone. */
+export function vignetteDe(mission: MissionContent): string {
+  return mission.vignette ?? ZONE_BY_ID[mission.zoneId].decor;
+}
