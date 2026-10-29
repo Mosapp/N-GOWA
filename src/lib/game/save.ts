@@ -86,6 +86,8 @@ export type Sauvegarde = {
   version: typeof SAVE_VERSION;
   profil: Profil | null;
   decouverteVue: boolean;
+  /** Jours (AAAA-MM-JJ) où une mission a été terminée, 14 au plus. Pas de « série » à perdre. */
+  joursJoues: string[];
   missions: Record<string, MissionRecord>;
   competences: Partial<Record<CompetenceId, CompetenceRecord>>;
   defis: Record<string, DefiRecord>;
@@ -107,6 +109,7 @@ export function sauvegardeVide(now: number): Sauvegarde {
     version: SAVE_VERSION,
     profil: null,
     decouverteVue: false,
+    joursJoues: [],
     missions: {},
     competences: {},
     defis: {},
@@ -180,6 +183,9 @@ export function migrerSauvegarde(brut: unknown, now: number): Sauvegarde {
     version: SAVE_VERSION,
     profil: lireProfil(brut.profil),
     decouverteVue: booleen(brut.decouverteVue, false),
+    joursJoues: Array.isArray(brut.joursJoues)
+      ? brut.joursJoues.filter((j): j is string => typeof j === "string" && /^\d{4}-\d{2}-\d{2}$/.test(j)).slice(-14)
+      : [],
     missions: lireDictionnaire(brut.missions, (m) =>
       isObj(m)
         ? {

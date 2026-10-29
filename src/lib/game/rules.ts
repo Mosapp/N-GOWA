@@ -10,7 +10,7 @@ import type {
   TrancheAge,
   ZoneId,
 } from "@/content/types";
-import type { DefiStatut, Sauvegarde } from "./save";
+import { jourLocal, type DefiStatut, type Sauvegarde } from "./save";
 
 /* ------------------------------- âge -------------------------------------- */
 
@@ -263,8 +263,12 @@ export function appliquerResultat(
     };
   }
 
+  const jour = jourLocal(Date.parse(maintenantIso));
+  const joursJoues = save.joursJoues.includes(jour) ? save.joursJoues : [...save.joursJoues, jour].slice(-14);
+
   const suivante: Sauvegarde = {
     ...save,
+    joursJoues,
     competences,
     missions: {
       ...save.missions,
@@ -334,4 +338,38 @@ export function marquerPinsVus(save: Sauvegarde): Sauvegarde {
     Object.entries(save.pins).map(([id, p]) => [id, { ...p, vu: true }]),
   );
   return { ...save, pins };
+}
+
+/* ----------------------------- tableau de bord ---------------------------- */
+
+/** Prochaine mission à jouer (la première non terminée et disponible), sinon null. */
+export function prochaineMission(save: Sauvegarde): MissionContent | null {
+  for (const zone of ZONES) {
+    if (statutZone(zone.id) !== "ouverte") continue;
+    const m = missionsDeZone(zone.id).find((x) => statutMission(save, x) === "disponible");
+    if (m) return m;
+  }
+  return null;
+}
+
+/** Prochain pin réellement atteignable aujourd'hui (pas ceux des zones à venir). */
+export function prochainPin(save: Sauvegarde): PinContent | null {
+  return (
+    PINS.find(
+      (p) => !save.pins[p.id] && p.regle.type !== "points-total" && p.regle.type !== "champion",
+    ) ?? null
+  );
+}
+
+/** Les 7 jours de la semaine en cours (lundi → dimanche), et s'ils ont été joués. */
+export function semaine(save: Sauvegarde, now: number): { jour: string; initiale: string; joue: boolean; aujourdhui: boolean }[] {
+  const d = new Date(now);
+  const decalage = (d.getDay() + 6) % 7; // lundi = 0
+  const lundi = new Date(d.getFullYear(), d.getMonth(), d.getDate() - decalage);
+  const initiales = ["L", "M", "M", "J", "V", "S", "D"];
+  const aujourdhui = jourLocal(now);
+  return initiales.map((initiale, i) => {
+    const jour = jourLocal(new Date(lundi.getFullYear(), lundi.getMonth(), lundi.getDate() + i).getTime());
+    return { jour, initiale, joue: save.joursJoues.includes(jour), aujourdhui: jour === aujourdhui };
+  });
 }

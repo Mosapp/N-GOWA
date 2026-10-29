@@ -301,7 +301,7 @@ export function ScreenHeader({
   sticky?: boolean;
 }) {
   return (
-    <header className={`${sticky ? "sticky top-0" : ""} z-20 flex items-center gap-3 bg-ng-cream/95 px-4 py-3 backdrop-blur`}>
+    <header className={`${sticky ? "sticky top-0 bg-ng-cream/95 backdrop-blur" : ""} z-20 flex items-center gap-3 px-4 py-3`}>
       {onBack ? (
         <button
           type="button"

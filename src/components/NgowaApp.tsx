@@ -192,7 +192,7 @@ export function NgowaApp() {
 
   return (
     <Shell save={save} route={route} naviguer={naviguer} statut={statut}>
-      {route.nom === "carte" ? <AdventureMap save={save} naviguer={naviguer} /> : null}
+      {route.nom === "carte" ? <AdventureMap save={save} naviguer={naviguer} now={now} /> : null}
       {route.nom === "zone" ? (
         <ZoneScreen save={save} zoneId={route.zoneId} naviguer={naviguer} statut={statut} />
       ) : null}

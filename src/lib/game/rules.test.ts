@@ -6,6 +6,9 @@ import {
   accepterDefi,
   appliquerResultat,
   BAREME,
+  prochaineMission,
+  prochainPin,
+  semaine,
   declarerDefi,
   etoilesMission,
   pointsMission,
@@ -213,5 +216,27 @@ describe("défis du vrai monde", () => {
     save = declarerDefi(save, "expliquer-tri", ISO);
     save = validerDefi(save, "expliquer-tri", ISO).save;
     expect(pointsTotal(save)).toBe(0);
+  });
+});
+
+describe("tableau de bord", () => {
+  it("retient les jours joués sans compteur de série", () => {
+    let save = sauvegardeVide(NOW);
+    save = jouer(save, resultatParfait("marche-adjoua")).save;
+    save = jouer(save, resultatParfait("marche-adjoua")).save;
+    expect(save.joursJoues).toHaveLength(1);
+    const s = semaine(save, NOW);
+    expect(s).toHaveLength(7);
+    expect(s.filter((j) => j.joue)).toHaveLength(1);
+    expect(s.find((j) => j.aujourdhui)?.joue).toBe(true);
+  });
+
+  it("propose la prochaine mission et le prochain pin atteignable", () => {
+    let save = sauvegardeVide(NOW);
+    expect(prochaineMission(save)?.id).toBe("marche-adjoua");
+    expect(prochainPin(save)?.id).toBe("eco-tri");
+    for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
+    expect(prochaineMission(save)).toBeNull();
+    expect(["seconde-vie", "heros-vrai-monde"]).toContain(prochainPin(save)?.id);
   });
 });
