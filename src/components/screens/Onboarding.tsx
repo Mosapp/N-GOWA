@@ -98,7 +98,7 @@ export function Onboarding({
       {etape === 0 ? (
         <section className="anim-rise mt-5 flex flex-1 flex-col">
           <h1 className="text-center font-display text-3xl">Choisis ton personnage</h1>
-          <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-7">
             {AVATARS.map((a) => {
               const choisi = avatar === a.id;
               return (
@@ -110,12 +110,12 @@ export function Onboarding({
                     setAvatar(a.id);
                   }}
                   aria-pressed={choisi}
-                  className={`flex flex-col items-center gap-1 rounded-3xl border-4 p-2 pb-3 transition-transform ${
+                  className={`flex min-w-0 flex-col items-center gap-1 rounded-3xl border-4 px-0.5 py-1.5 transition-transform ${
                     choisi ? "scale-105 border-ng-yellow bg-ng-sun-soft" : "border-transparent bg-white"
                   }`}
                 >
-                  <Avatar id={a.id} size={74} />
-                  <span className="font-display text-base">{a.nom}</span>
+                  <Avatar id={a.id} size={60} />
+                  <span className="w-full truncate text-center font-display text-[13px] leading-tight tracking-tight">{a.nom}</span>
                 </button>
               );
             })}

@@ -1,6 +1,10 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
+  AVATAR_IDS,
   chargerSauvegarde,
   enregistrerSauvegarde,
   LEGACY_PROFILE_KEY,
@@ -80,5 +84,13 @@ describe("sauvegarde locale", () => {
 
   it("limite et nettoie le pseudo", () => {
     expect(nettoyerPseudo("   Super    Trieur   du   quartier  ")).toBe("Super Trieur du");
+  });
+});
+
+describe("avatars", () => {
+  it("chaque avatar a son portrait dans public/illustrations/avatars", () => {
+    for (const id of AVATAR_IDS) {
+      expect(existsSync(join(process.cwd(), "public", "illustrations", "avatars", `${id}.webp`)), id).toBe(true);
+    }
   });
 });

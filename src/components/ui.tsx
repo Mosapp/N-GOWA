@@ -234,13 +234,23 @@ export function CharacterMedallion({ id, size = 64 }: { id: string; size?: numbe
 
 /* --------------------------------- Avatars -------------------------------- */
 
-export const AVATARS: { id: AvatarId; nom: string; emoji?: string; couleur: string }[] = [
-  { id: "kofi", nom: "Kofi", couleur: "#FCD9BD" },
-  { id: "awa", nom: "Awa", couleur: "#E4D6F5" },
-  { id: "elephant", nom: "Éléphant", emoji: "🐘", couleur: "#DCE6EE" },
-  { id: "tortue", nom: "Tortue", emoji: "🐢", couleur: "#D8F0DC" },
-  { id: "calao", nom: "Calao", emoji: "🦜", couleur: "#FFE9B8" },
-  { id: "papillon", nom: "Papillon", emoji: "🦋", couleur: "#D9EEFB" },
+const portrait = (id: string) => `/illustrations/avatars/${id}.webp`;
+
+export const AVATARS: { id: AvatarId; nom: string; image: string; couleur: string }[] = [
+  { id: "kofi", nom: "Kofi", image: portrait("kofi"), couleur: "#FCD9BD" },
+  { id: "awa", nom: "Awa", image: portrait("awa"), couleur: "#E4D6F5" },
+  { id: "moussa", nom: "Moussa", image: portrait("moussa"), couleur: "#CDEBD9" },
+  { id: "fatou", nom: "Fatou", image: portrait("fatou"), couleur: "#FBEFC4" },
+  { id: "yann", nom: "Yann", image: portrait("yann"), couleur: "#D3E8F7" },
+  { id: "aicha", nom: "Aïcha", image: portrait("aicha"), couleur: "#FBDCC8" },
+  { id: "kouame", nom: "Kouamé", image: portrait("kouame"), couleur: "#F6C9B8" },
+  { id: "ama", nom: "Ama", image: portrait("ama"), couleur: "#E4D9F7" },
+  { id: "elephant", nom: "Éléphant", image: portrait("elephant"), couleur: "#DCE2E4" },
+  { id: "tortue", nom: "Tortue", image: portrait("tortue"), couleur: "#E2EDC9" },
+  { id: "calao", nom: "Calao", image: portrait("calao"), couleur: "#FBE7BE" },
+  { id: "papillon", nom: "Papillon", image: portrait("papillon"), couleur: "#D3E5F2" },
+  { id: "chimpanze", nom: "Chimpo", image: portrait("chimpanze"), couleur: "#F3DDC6" },
+  { id: "hippo", nom: "Hippo", image: portrait("hippo"), couleur: "#F5D2D2" },
 ];
 
 export function Avatar({ id, size = 56 }: { id: AvatarId; size?: number }) {
@@ -251,18 +261,8 @@ export function Avatar({ id, size = 56 }: { id: AvatarId; size?: number }) {
       style={{ width: size, height: size, background: a.couleur }}
       aria-hidden
     >
-      {a.emoji ? (
-        <span style={{ fontSize: size * 0.58, lineHeight: 1 }}>{a.emoji}</span>
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element -- portrait recadré depuis l'illustration locale
-        <img
-          src={illustrationMascotte(a.id as MascotId, "salue").image}
-          alt=""
-          className="absolute max-w-none"
-          style={a.id === "awa" ? { width: "205%", left: "-32%", top: "1%" } : { width: "235%", left: "-49%", top: "2%" }}
-          draggable={false}
-        />
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element -- portrait carré local, affiché en rond */}
+      <img src={a.image} alt="" className="h-full w-full object-cover" draggable={false} />
     </div>
   );
 }

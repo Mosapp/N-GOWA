@@ -9,7 +9,7 @@
  * le localStorage de l'appareil.
  */
 
-const CACHE = "ngowa-v4";
+const CACHE = "ngowa-v5";
 const ESSENTIELS = [
   "/",
   "/manifest.webmanifest",
@@ -26,6 +26,9 @@ const ESSENTIELS = [
   ].map((n) => `/illustrations/missions/${n}.webp`),
   ...["accueil", "village-tri", "riviere-vivante", "foret-decouvertes", "royaume-energie", "pause", "kofi-repos", "awa-au-revoir", "coffre", "carte-portrait", "carte-paysage"].map(
     (n) => `/illustrations/decors/${n}.webp`,
+  ),
+  ...["moussa", "fatou", "yann", "aicha", "kouame", "ama", "elephant", "tortue", "calao", "papillon", "chimpanze", "hippo", "kofi", "awa"].map(
+    (n) => `/illustrations/avatars/${n}.webp`,
   ),
   "/icons/icon-192.png",
   "/icons/icon-512.png",
