@@ -176,6 +176,73 @@ function Picto({ picto, couleur }: { picto: BacContent["picto"]; couleur: string
           <path d="M-13 -13 L 13 13" />
         </g>
       );
+    case "arbre":
+      return (
+        <g {...trait}>
+          <path d="M0 14 V 2" />
+          <path d="M-11 2 a 8 8 0 0 1 2 -12 a 9 9 0 0 1 17 0 a 8 8 0 0 1 3 12 z" fill={couleur} fillOpacity={0.2} />
+        </g>
+      );
+    case "herbe":
+      return (
+        <g {...trait}>
+          <path d="M-13 12 H 13" />
+          <path d="M-9 12 L -11 -2 M -4 12 L -4 -8 M 1 12 L 3 -12 M 6 12 L 10 -4 M 10 12 L 13 2" />
+        </g>
+      );
+    case "vague":
+      return (
+        <g {...trait}>
+          <path d="M-13 -5 q 4.3 -5 8.6 0 t 8.6 0 t 8.6 0" />
+          <path d="M-13 3 q 4.3 -5 8.6 0 t 8.6 0 t 8.6 0" />
+          <path d="M-13 11 q 4.3 -5 8.6 0 t 8.6 0 t 8.6 0" />
+        </g>
+      );
+    case "fleur":
+      return (
+        <g {...trait}>
+          {[0, 72, 144, 216, 288].map((a) => (
+            <ellipse key={a} cx="0" cy="-7" rx="4" ry="6" transform={`rotate(${a})`} fill={couleur} fillOpacity={0.18} />
+          ))}
+          <circle r="3.2" fill={couleur} />
+        </g>
+      );
+    case "coeur":
+      return (
+        <path
+          d="M0 12 C -15 2, -13 -11, -6 -11 C -2 -11, 0 -8, 0 -6 C 0 -8, 2 -11, 6 -11 C 13 -11, 15 2, 0 12 Z"
+          {...trait}
+          fill={couleur}
+          fillOpacity={0.2}
+        />
+      );
+    case "coeur-brise":
+      return (
+        <g {...trait}>
+          <path
+            d="M0 12 C -15 2, -13 -11, -6 -11 C -2 -11, 0 -8, 0 -6 C 0 -8, 2 -11, 6 -11 C 13 -11, 15 2, 0 12 Z"
+            fill={couleur}
+            fillOpacity={0.12}
+          />
+          <path d="M0 -6 L -3 0 L 2 3 L -1 10" />
+        </g>
+      );
+    case "maison":
+      return (
+        <g {...trait}>
+          <path d="M-12 0 L 0 -11 L 12 0" />
+          <path d="M-8 -3 V 12 H 8 V -3" fill={couleur} fillOpacity={0.15} />
+          <path d="M-2.5 12 V 5 H 2.5 V 12" />
+        </g>
+      );
+    case "danger":
+      return (
+        <g {...trait}>
+          <path d="M0 -13 L 13 11 H -13 Z" fill={couleur} fillOpacity={0.15} />
+          <path d="M0 -4 V 3" />
+          <circle cx="0" cy="7.5" r="0.6" />
+        </g>
+      );
     case "poubelle":
       return (
         <g {...trait}>

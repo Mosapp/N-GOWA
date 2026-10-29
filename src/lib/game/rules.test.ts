@@ -137,11 +137,25 @@ describe("déblocage des missions et des zones", () => {
     let save = sauvegardeVide(NOW);
     expect(statutZone(save, "village-tri")).toBe("ouverte");
     expect(statutZone(save, "riviere-vivante")).toBe("verrouillee");
-    expect(statutZone(save, "foret-decouvertes")).toBe("bientot");
+    expect(statutZone(save, "foret-decouvertes")).toBe("verrouillee");
     expect(statutZone(save, "royaume-energie")).toBe("bientot");
     for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
     expect(statutZone(save, "riviere-vivante")).toBe("ouverte");
     expect(prochaineMission(save)?.id).toBe("chaque-goutte");
+  });
+
+  it("la Forêt s'ouvre après la Rivière, et Ami de la Nature s'y obtient", () => {
+    let save = sauvegardeVide(NOW);
+    for (const m of MISSIONS.filter((x) => x.zoneId !== "foret-decouvertes")) save = jouer(save, resultatParfait(m.id)).save;
+    expect(statutZone(save, "foret-decouvertes")).toBe("ouverte");
+    expect(prochaineMission(save)?.id).toBe("qui-vit-ou");
+    const obtenus: string[] = [];
+    for (const m of MISSIONS.filter((x) => x.zoneId === "foret-decouvertes")) {
+      const bilan = jouer(save, resultatParfait(m.id));
+      save = bilan.save;
+      obtenus.push(...bilan.nouveauxPins);
+    }
+    expect(obtenus).toContain("ami-nature");
   });
 
   it("Gardien de l'Eau s'obtient dans la Rivière Vivante", () => {

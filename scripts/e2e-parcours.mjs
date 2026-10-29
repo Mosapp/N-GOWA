@@ -277,6 +277,37 @@ try {
   ok(saveRiv.missions["chaque-goutte"]?.terminee, "mission de la Rivière enregistrée");
   await ctxRiv.close();
 
+  /* ------------------------ Forêt des Découvertes ------------------------- */
+  console.log("Forêt des Découvertes");
+  const ctxFor = await browser.newContext({ ...devices["Pixel 5"] });
+  const foret = await ctxFor.newPage();
+  await creerProfil(foret, /6, 7 ou 8 ans/);
+  await foret.evaluate((k) => {
+    const s = JSON.parse(localStorage.getItem(k));
+    const iso = new Date().toISOString();
+    for (const id of ["marche-adjoua", "cour-ecole", "seconde-vie", "objets-dangereux", "chaque-goutte", "riviere-propre", "tresor-de-l-eau"]) {
+      s.missions[id] = { meilleursPoints: 80, meilleuresEtoiles: 2, parties: 1, terminee: true, derniereFois: iso };
+    }
+    localStorage.setItem(k, JSON.stringify(s));
+  }, SAVE_KEY);
+  await foret.reload();
+  await foret.getByRole("button", { name: "Continuer l'aventure" }).first().click();
+  ok(
+    await foret.getByRole("button", { name: /^La Forêt des Découvertes : 0 missions sur 3/ }).first().isVisible(),
+    "la Forêt s'ouvre après la Rivière",
+  );
+  await lancerMission(foret, 1, /^La Forêt des Découvertes/);
+  ok((await foret.getByRole("button", { name: /^Mettre « / }).count()) === 4, "« Qui vit où ? » : quatre habitats");
+  const f = await jouerTri(foret, { glisser: false });
+  ok(f.objets === 8, "« Qui vit où ? » : 8 espèces placées");
+  await foret.getByText("La question d'Awa").waitFor();
+  await repondreQuestion(foret);
+  await foret.getByRole("button", { name: "Continuer", exact: true }).click();
+  ok(await foret.getByRole("heading", { name: /L'observateur de la nature/ }).isVisible(), "défi réel « observer une plante » proposé");
+  await foret.getByRole("button", { name: "Je relève le défi !" }).click();
+  ok((await lireSave(foret)).missions["qui-vit-ou"]?.terminee, "mission de la Forêt enregistrée");
+  await ctxFor.close();
+
   console.log(`\n${etapes} vérifications réussies.`);
 } finally {
   await browser.close();

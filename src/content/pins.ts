@@ -5,9 +5,9 @@ import type { PinContent } from "./types";
  *
  * Les seuils sont CONFIGURABLES ici et devront être équilibrés après des
  * tests avec des enfants. Les seuils du cahier des charges (200 / 400 / 600 /
- * 800 / 1000) servent de base ; « Gardien de l'Eau » est ramené à 150 points
- * dans la Rivière Vivante, qui compte 3 missions (contre 4 au Village), pour
- * rester atteignable par les 4-5 ans.
+ * 800 / 1000) servent de base ; « Gardien de l'Eau » et « Ami de la Nature »
+ * demandent 150 points dans leur zone, qui compte 3 missions (contre 4 au
+ * Village), pour rester atteignables par les 4-5 ans.
  *
  * Un pin de pilier demande aussi d'avoir joué dans la zone correspondante :
  * on ne peut pas devenir « Gardien de l'Eau » en ne triant que des déchets.
@@ -57,11 +57,11 @@ export const PINS: PinContent[] = [
     id: "ami-nature",
     nom: "Ami de la Nature",
     description: "Tu protèges les plantes et les animaux.",
-    commentObtenir: "600 points et des missions dans la Forêt des Découvertes (bientôt).",
+    commentObtenir: "Gagne 150 points dans la Forêt des Découvertes.",
     couleur: "#237A44",
     couleurFoncee: "#134D29",
     embleme: "feuille",
-    regle: { type: "points-total", seuil: 600, zoneRequise: "foret-decouvertes" },
+    regle: { type: "points-zone", zoneId: "foret-decouvertes", seuil: 150 },
   },
   {
     id: "energie-maligne",
