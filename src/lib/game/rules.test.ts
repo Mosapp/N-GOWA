@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { PINS } from "@/content/pins";
-import { MISSIONS, VILLAGE_MISSIONS } from "@/content/village";
+import { DEFI_BY_ID, MISSIONS, VILLAGE_MISSIONS } from "@/content/village";
 import {
   accepterDefi,
   appliquerResultat,
@@ -42,9 +42,17 @@ function jouer(save: Sauvegarde, res: ResultatMission) {
   return appliquerResultat(save, res, ISO);
 }
 
-describe("contenu du Village du Tri", () => {
+describe("contenu des missions", () => {
+  it("chaque mission a un défi réel et des identifiants uniques", () => {
+    const ids = MISSIONS.map((m) => m.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const m of MISSIONS) expect(DEFI_BY_ID[m.defiId]).toBeDefined();
+    const objets = MISSIONS.flatMap((m) => m.objets.map((o) => `${m.id}/${o.id}`));
+    expect(new Set(objets).size).toBe(objets.length);
+  });
+
   it("chaque mission a assez d'objets pour chaque tranche, sur ses propres bacs", () => {
-    for (const mission of VILLAGE_MISSIONS) {
+    for (const mission of MISSIONS) {
       for (const complexite of ["petit", "grand"] as const) {
         const bacs = mission.bacs[complexite];
         const eligibles = mission.objets.filter(
@@ -60,7 +68,7 @@ describe("contenu du Village du Tri", () => {
   });
 
   it("la sélection couvre tous les bacs et respecte la tranche d'âge", () => {
-    for (const mission of VILLAGE_MISSIONS) {
+    for (const mission of MISSIONS) {
       for (let graine = 1; graine < 40; graine += 1) {
         const petit = selectionnerObjets(mission, "petit", graine);
         expect(petit).toHaveLength(mission.nombreObjets.petit);
@@ -125,11 +133,28 @@ describe("déblocage des missions et des zones", () => {
     expect(statutMission(save, m3)).toBe("verrouillee");
   });
 
-  it("seul le Village du Tri est jouable ; les autres zones sont annoncées", () => {
-    expect(statutZone("village-tri")).toBe("ouverte");
-    expect(statutZone("riviere-vivante")).toBe("bientot");
-    expect(statutZone("foret-decouvertes")).toBe("bientot");
-    expect(statutZone("royaume-energie")).toBe("bientot");
+  it("la Rivière s'ouvre quand le Village est terminé ; les autres zones sont annoncées", () => {
+    let save = sauvegardeVide(NOW);
+    expect(statutZone(save, "village-tri")).toBe("ouverte");
+    expect(statutZone(save, "riviere-vivante")).toBe("verrouillee");
+    expect(statutZone(save, "foret-decouvertes")).toBe("bientot");
+    expect(statutZone(save, "royaume-energie")).toBe("bientot");
+    for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
+    expect(statutZone(save, "riviere-vivante")).toBe("ouverte");
+    expect(prochaineMission(save)?.id).toBe("chaque-goutte");
+  });
+
+  it("Gardien de l'Eau s'obtient dans la Rivière Vivante", () => {
+    let save = sauvegardeVide(NOW);
+    for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
+    expect(save.pins["gardien-eau"]).toBeUndefined();
+    const obtenus: string[] = [];
+    for (const m of MISSIONS.filter((x) => x.zoneId === "riviere-vivante")) {
+      const bilan = jouer(save, resultatParfait(m.id));
+      save = bilan.save;
+      obtenus.push(...bilan.nouveauxPins);
+    }
+    expect(obtenus).toContain("gardien-eau");
   });
 });
 
@@ -235,7 +260,7 @@ describe("tableau de bord", () => {
     let save = sauvegardeVide(NOW);
     expect(prochaineMission(save)?.id).toBe("marche-adjoua");
     expect(prochainPin(save)?.id).toBe("eco-tri");
-    for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
+    for (const m of MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
     expect(prochaineMission(save)).toBeNull();
     expect(["seconde-vie", "heros-vrai-monde"]).toContain(prochainPin(save)?.id);
   });

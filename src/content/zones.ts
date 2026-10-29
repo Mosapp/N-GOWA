@@ -2,8 +2,9 @@ import type { ZoneContent, ZoneId } from "./types";
 
 /**
  * Les quatre zones de la carte d'aventure.
- * Seul le Village du Tri est jouable dans le MVP : les autres zones sont
- * affichées comme « bientôt », sans mission simulée.
+ * Le Village du Tri et la Rivière Vivante sont jouables ; une zone s'ouvre
+ * quand la précédente est terminée. Les autres sont affichées « bientôt »,
+ * sans mission simulée.
  */
 export const ZONES: ZoneContent[] = [
   {
@@ -22,7 +23,7 @@ export const ZONES: ZoneContent[] = [
     pilier: "eau",
     accroche: "Garder l'eau propre et ne pas la gaspiller.",
     couleur: "#1A6FA8",
-    disponibilite: "bientot",
+    disponibilite: "jouable",
   },
   {
     id: "foret-decouvertes",

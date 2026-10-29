@@ -21,7 +21,7 @@ import {
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import { PIN_BY_ID } from "@/content/pins";
 import type { QuestionMission } from "@/content/types";
-import { BACS, COMPETENCES, DEFI_BY_ID, MISSION_BY_ID } from "@/content/village";
+import { BACS, COMPETENCES, DEFI_BY_ID, MISSION_BY_ID, vignetteDe } from "@/content/village";
 import {
   accepterDefi,
   aleatoire,
@@ -112,7 +112,7 @@ export function MissionScreen({
           personnage={mission.personnageId}
           nomPerso={perso?.nom ?? ""}
           bacs={mission.bacs[complexite].map((b) => BACS[b].nom)}
-          vignette={mission.vignette}
+          vignette={vignetteDe(mission)}
           onPlay={() => setPhase("jeu")}
         />
       ) : null}
@@ -224,7 +224,7 @@ function Intro({
           <p>{histoire}</p>
         </SpeechBubble>
       </div>
-      <div className="mt-4 flex flex-wrap justify-center gap-2" aria-label="Les poubelles de cette mission">
+      <div className="mt-4 flex flex-wrap justify-center gap-2" aria-label="Les choix de cette mission">
         {bacs.map((b) => (
           <span key={b} className="rounded-full bg-white px-3 py-1 font-display text-base shadow-[0_2px_0_rgba(45,42,38,0.08)]">
             {b}
@@ -341,7 +341,7 @@ function Resultat({
   const perseverance = resultats.length - premierCoup;
   const message =
     bilan.etoiles === 3
-      ? "Mission réussie ! Tu es un vrai champion du tri."
+      ? "Mission réussie ! Tu es un vrai champion de la nature."
       : perseverance > 0
         ? "Mission réussie ! Tu t'es trompé parfois, mais tu n'as pas abandonné. C'est comme ça qu'on apprend !"
         : "Mission réussie, bravo !";

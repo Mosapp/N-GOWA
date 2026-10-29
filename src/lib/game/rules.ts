@@ -144,11 +144,21 @@ export function statutMission(save: Sauvegarde, mission: MissionContent): Statut
   return "verrouillee";
 }
 
-export type StatutZone = "ouverte" | "bientot";
+export type StatutZone = "ouverte" | "verrouillee" | "bientot";
 
-export function statutZone(zoneId: ZoneId): StatutZone {
-  const zone = ZONES.find((z) => z.id === zoneId);
-  return zone?.disponibilite === "jouable" && missionsDeZone(zoneId).length ? "ouverte" : "bientot";
+/**
+ * - "bientot" : zone annoncée, sans missions ;
+ * - "verrouillee" : jouable, mais la zone précédente n'est pas terminée ;
+ * - "ouverte" : on peut y jouer.
+ */
+export function statutZone(save: Sauvegarde, zoneId: ZoneId): StatutZone {
+  const index = ZONES.findIndex((z) => z.id === zoneId);
+  const zone = ZONES[index];
+  if (!zone || zone.disponibilite !== "jouable" || !missionsDeZone(zoneId).length) return "bientot";
+  const precedente = ZONES[index - 1];
+  if (!precedente) return "ouverte";
+  const prog = progressionZone(save, precedente.id);
+  return prog.terminees >= prog.total ? "ouverte" : "verrouillee";
 }
 
 export function progressionZone(save: Sauvegarde, zoneId: ZoneId) {
@@ -345,18 +355,22 @@ export function marquerPinsVus(save: Sauvegarde): Sauvegarde {
 /** Prochaine mission à jouer (la première non terminée et disponible), sinon null. */
 export function prochaineMission(save: Sauvegarde): MissionContent | null {
   for (const zone of ZONES) {
-    if (statutZone(zone.id) !== "ouverte") continue;
+    if (statutZone(save, zone.id) !== "ouverte") continue;
     const m = missionsDeZone(zone.id).find((x) => statutMission(save, x) === "disponible");
     if (m) return m;
   }
   return null;
 }
 
-/** Prochain pin réellement atteignable aujourd'hui (pas ceux des zones à venir). */
+/** Prochain pin réellement atteignable aujourd'hui (dans une zone ouverte). */
 export function prochainPin(save: Sauvegarde): PinContent | null {
   return (
     PINS.find(
-      (p) => !save.pins[p.id] && p.regle.type !== "points-total" && p.regle.type !== "champion",
+      (p) =>
+        !save.pins[p.id] &&
+        p.regle.type !== "points-total" &&
+        p.regle.type !== "champion" &&
+        (p.regle.type !== "points-zone" || statutZone(save, p.regle.zoneId) === "ouverte"),
     ) ?? null
   );
 }

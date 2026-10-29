@@ -221,7 +221,13 @@ export function CharacterMedallion({ id, size = 64 }: { id: string; size?: numbe
       aria-label={`${c.nom}, ${c.role}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- portrait local, mis en cache hors ligne */}
-      <img src={c.portrait} alt="" className="h-full w-full scale-[1.35] object-cover object-[50%_18%]" draggable={false} />
+      <img
+        src={c.portrait}
+        alt=""
+        className="h-full w-full object-cover"
+        style={{ objectPosition: c.cadrage ?? "50% 18%", transform: `scale(${c.zoom ?? 1.35})`, transformOrigin: c.cadrage ? "50% 0%" : "50% 50%" }}
+        draggable={false}
+      />
     </div>
   );
 }
