@@ -1,3 +1,4 @@
+import { illustrer } from "./illustrations";
 import type { DefiReelContent, MissionContent } from "./types";
 
 /* ------------------------------------------------------------------ */
@@ -6,7 +7,7 @@ import type { DefiReelContent, MissionContent } from "./types";
 /* l'enfant ne manipule jamais seul les prises et les appareils.       */
 /* ------------------------------------------------------------------ */
 
-export const ENERGIE_MISSIONS: MissionContent[] = [
+const MISSIONS: MissionContent[] = [
   {
     id: "chasse-gaspillage",
     vignette: "/illustrations/missions/chasse-gaspillage.webp",
@@ -21,7 +22,7 @@ export const ENERGIE_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "Ce geste économise l'électricité ? Ou il la gaspille ?",
-      grand: "Glisse chaque geste du bon côté : il économise l'électricité, ou il la gaspille.",
+      grand: "Pour chaque carte, pousse le levier : en haut s'il économise l'électricité, en bas s'il la gaspille.",
     },
     objectif: {
       japprends: "Un appareil qui marche pour personne gaspille l'électricité.",
@@ -129,7 +130,7 @@ export const ENERGIE_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "Ça marche avec le soleil, le vent ou l'eau ? Ou avec un carburant ?",
-      grand: "Glisse chaque exemple du bon côté : énergie qui revient, ou énergie qui s'épuise.",
+      grand: "Pour chaque carte, pousse le levier : en haut pour l'énergie qui revient, en bas pour celle qui s'épuise.",
     },
     objectif: {
       japprends: "Le soleil, le vent et l'eau donnent une énergie qui revient (renouvelable).",
@@ -241,7 +242,7 @@ export const ENERGIE_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "Ce geste est sans danger ? Ou c'est dangereux ?",
-      grand: "Glisse chaque geste du bon côté : sans danger, ou danger électrique.",
+      grand: "Pour chaque carte, pousse le levier : en haut si c'est sans danger, en bas si c'est dangereux.",
     },
     objectif: {
       japprends: "Les prises, les fils et l'eau peuvent être très dangereux.",
@@ -336,6 +337,8 @@ export const ENERGIE_MISSIONS: MissionContent[] = [
     defiId: "chasseur-de-veille",
   },
 ];
+
+export const ENERGIE_MISSIONS = illustrer(MISSIONS, "interrupteur", () => "village-nuit");
 
 export const ENERGIE_DEFIS: DefiReelContent[] = [
   {

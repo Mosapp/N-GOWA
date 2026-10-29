@@ -9,7 +9,7 @@
  * le localStorage de l'appareil.
  */
 
-const CACHE = "ngowa-v7";
+const CACHE = "ngowa-v8";
 const ESSENTIELS = [
   "/",
   "/manifest.webmanifest",
@@ -30,14 +30,34 @@ const ESSENTIELS = [
   ...["moussa", "fatou", "yann", "aicha", "kouame", "ama", "elephant", "tortue", "calao", "papillon", "chimpanze", "hippo", "kofi", "awa"].map(
     (n) => `/illustrations/avatars/${n}.webp`,
   ),
-  // Scènes de ramassage du village et leurs objets dessinés.
-  ...["marche-adjoua", "cour-ecole", "seconde-vie", "objets-dangereux"].map((n) => `/illustrations/scenes/${n}.webp`),
+  // Décors des mini-jeux, objets dessinés et pièces animées
+  // (liste vérifiée par src/lib/game/offline.test.ts).
   ...[
-    "sachet-eau", "bouteille-plastique", "sac-marche", "carton", "journal", "peau-banane", "epluchures-igname", "peau-mangue", "gobelet",
-    "bouteille-verre", "pot-miel", "feuille-dessin", "cahier-fini", "emballage-biscuit", "sachet-eau-ecole", "peau-orange", "reste-riz", "coco",
-    "bocal", "pagne", "carton-jouets", "cahier-moitie", "bidon", "sachet-dechire", "peau-banane-sv", "journal-mouille", "gobelet-casse",
-    "pile", "medicaments", "ampoule-cassee", "telephone-casse", "bouteille-danger", "epluchures-danger", "feuilles-marche", "enveloppe",
+    "cour-ecole", "habitats", "marche-adjoua", "nature", "objets-dangereux", "riviere",
+    "seconde-vie", "village-nuit",
+  ].map((n) => `/illustrations/scenes/${n}.webp`),
+  ...[
+    "abeille", "ampoule-cassee", "antilope", "arracher-fleurs", "arroser-plante", "attraper-papillon",
+    "barrage", "bidon", "bocal", "bouteille-danger", "bouteille-plastique", "bouteille-verre",
+    "buffle", "cahier-fini", "cahier-moitie", "carton", "carton-jouets", "cerf-volant",
+    "chauffe-eau-solaire", "chimpanze", "clim-fenetre", "coco", "cour-tuyau", "crocodile",
+    "dechet-poubelle", "demander-adulte", "doigts-prise", "douche-courte", "eau-bouilloire", "eau-huile",
+    "eau-javel", "eau-peinture", "eau-pluie", "eau-riz", "eau-salee", "elephant",
+    "emballage-biscuit", "enveloppe", "eolienne", "epluchures-danger", "epluchures-igname", "eteindre-sortant",
+    "fenetre-air", "feu-brousse", "feuille-dessin", "feuilles-marche", "fil-tombe", "filet-abandonne",
+    "frigo-ouvert", "fuite-ignoree", "gobelet", "gobelet-casse", "gobelet-dents", "graver-arbre",
+    "groupe-electrogene", "hippo-nain", "huile-lagune", "interrupteur", "jardin-fleurs", "jouer-tuyau",
+    "journal", "journal-mouille", "laisser-nid", "lampe-jour", "lampe-petrole", "lampe-solaire",
+    "linge-bassine", "linge-soleil", "mains-mouillees", "mangrove-protegee", "mare-propre", "margouillat",
+    "medicaments", "musique-forte", "observer-oiseau", "pagne", "panneau-solaire", "papillon",
+    "peau-banane", "peau-banane-sv", "peau-mangue", "peau-orange", "peinture-caniveau", "perroquet-gris",
+    "pierres-oiseaux", "pile", "piles-eau", "plage-sachets", "planter-arbre", "poisson",
+    "pot-miel", "proteger-mangrove", "ramasser-adulte", "reste-riz", "rincage-legumes", "robinet-ferme-dents",
+    "robinet-ouvert", "sac-marche", "sachet-caniveau", "sachet-dechire", "sachet-eau", "sachet-eau-ecole",
+    "tele-seule", "telecommande", "telephone-casse", "tirer-fil", "tortue", "vaisselle-bassine",
+    "ventilo-vide", "vieil-arbre", "voiture-essence", "voiture-seau",
   ].map((n) => `/illustrations/objets/${n}.webp`),
+  ...["batterie", "batterie-energie", "levier-manche", "levier-socle"].map((n) => `/illustrations/jeux/${n}.webp`),
   ...["plastique", "papier", "verre", "restes", "danger", "reutiliser", "trier"].flatMap((n) => [
     `/illustrations/poubelles/${n}-corps.webp`,
     `/illustrations/poubelles/${n}-couvercle.webp`,

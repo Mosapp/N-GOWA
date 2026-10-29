@@ -263,6 +263,40 @@ body {
     opacity: 0;
   }
 }
+/* Radeaux qui descendent la rivière (positions données par variables). */
+@keyframes ng-flotte {
+  from {
+    transform: translateY(var(--de));
+  }
+  to {
+    transform: translateY(var(--a));
+  }
+}
+@keyframes ng-tangue {
+  0%,
+  100% {
+    transform: translateX(-5px) rotate(-3deg);
+  }
+  50% {
+    transform: translateX(5px) rotate(3deg);
+  }
+}
+@keyframes ng-vague {
+  from {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@keyframes ng-vers-batterie {
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(0.12) rotate(20deg);
+    opacity: 0.3;
+  }
+}
 /* La poubelle « avale » le déchet : petit tassement puis rebond. */
 @keyframes ng-gobe {
   0%,
@@ -286,6 +320,18 @@ body {
   }
 }
 
+.anim-flotte {
+  animation: ng-flotte linear infinite;
+}
+.anim-tangue {
+  animation: ng-tangue 3.2s ease-in-out infinite;
+}
+.anim-vague {
+  animation: ng-vague 0.7s ease-out forwards;
+}
+.anim-vers-batterie {
+  animation: ng-vers-batterie 0.5s cubic-bezier(0.5, -0.2, 0.7, 1) forwards;
+}
 .anim-gobe {
   transform-origin: 50% 100%;
   animation: ng-gobe 0.5s ease-out 0.4s;
@@ -339,6 +385,17 @@ html[data-motion="reduced"] *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+}
+/* Sans animations : les radeaux restent immobiles, alignés dans la rivière. */
+html[data-motion="reduced"] .anim-flotte {
+  animation: none !important;
+  transform: translateY(var(--repos));
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-flotte {
+    animation: none !important;
+    transform: translateY(var(--repos));
   }
 }
 

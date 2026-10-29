@@ -1,3 +1,4 @@
+import { illustrer } from "./illustrations";
 import type { DefiReelContent, MissionContent } from "./types";
 
 /* ------------------------------------------------------------------ */
@@ -6,7 +7,7 @@ import type { DefiReelContent, MissionContent } from "./types";
 /* de glisser-déposer, avec des panneaux au lieu de poubelles.         */
 /* ------------------------------------------------------------------ */
 
-export const RIVIERE_MISSIONS: MissionContent[] = [
+const MISSIONS: MissionContent[] = [
   {
     id: "chaque-goutte",
     vignette: "/illustrations/missions/chaque-goutte.webp",
@@ -21,7 +22,7 @@ export const RIVIERE_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "Ce geste économise l'eau ? Ou il la gaspille ?",
-      grand: "Glisse chaque geste du bon côté : il économise l'eau, ou il la gaspille.",
+      grand: "Pousse chaque radeau vers la bonne rive : la rive verte s'il économise l'eau, la rive grise s'il la gaspille.",
     },
     objectif: {
       japprends: "Reconnaître les gestes qui économisent l'eau à la maison.",
@@ -143,7 +144,7 @@ export const RIVIERE_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "Ce geste protège la rivière ? Ou il la salit ?",
-      grand: "Glisse chaque geste du bon côté : il protège la rivière, ou il la pollue.",
+      grand: "Pousse chaque radeau vers la bonne rive : la rive verte s'il protège la rivière, la rive grise s'il la pollue.",
     },
     objectif: {
       japprends: "Ce qu'on jette dans le caniveau peut finir dans la rivière.",
@@ -250,8 +251,8 @@ export const RIVIERE_MISSIONS: MissionContent[] = [
         "Une eau déjà utilisée peut parfois servir une deuxième fois : par exemple pour arroser les plantes. Mais attention, certaines eaux leur feraient du mal. À toi de trier !",
     },
     consigne: {
-      petit: "Cette eau est bonne pour les plantes ? Glisse-la au bon endroit.",
-      grand: "Cette eau peut-elle arroser les plantes ? Glisse-la du bon côté.",
+      petit: "Cette eau est bonne pour les plantes ? Pousse le radeau vers la bonne rive.",
+      grand: "Cette eau peut-elle arroser les plantes ? Pousse chaque radeau vers la bonne rive.",
     },
     objectif: {
       japprends: "Réutiliser certaines eaux pour arroser au lieu d'ouvrir le robinet.",
@@ -346,6 +347,8 @@ export const RIVIERE_MISSIONS: MissionContent[] = [
     defiId: "arrosoir-malin",
   },
 ];
+
+export const RIVIERE_MISSIONS = illustrer(MISSIONS, "riviere", () => "riviere");
 
 export const RIVIERE_DEFIS: DefiReelContent[] = [
   {

@@ -41,18 +41,38 @@ async function creerProfil(page, tranche) {
 async function jouerTri(page, { glisser = true } = {}) {
   let objets = 0;
   let indices = 0;
-  const dechets = page.getByRole("button", { name: /Glisse-le dans une poubelle/ });
+  const dechets = page.getByRole("button", { name: /Glisse-le/ });
   const bacs = page.getByRole("button", { name: /^Mettre « / });
   for (let garde = 0; garde < 20; garde += 1) {
     const avant = await dechets.count();
     if (!avant) break;
     const n = await bacs.count();
     let trouve = false;
+    // Vrai glisser-déposer : on choisit un élément visible et jouable (les
+    // radeaux bougent, seule la carte du dessus se joue), puis on essaie
+    // chaque réponse avec ce même élément.
+    let nom = null;
+    if (glisser) {
+      const vue = page.viewportSize();
+      for (let essai = 0; essai < 6 && !nom; essai += 1)
+      for (let k = avant - 1; k >= 0 && !nom; k -= 1) {
+        const el = dechets.nth(k);
+        const r = await el.boundingBox();
+        // Visible au centre (pas coupé par le bord de la scène) et jouable.
+        const auDessus = await el.evaluate((n) => {
+          const b = n.getBoundingClientRect();
+          return n.contains(document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2));
+        });
+        if (r && r.y > 0 && r.y + r.height < vue.height && auDessus && (await el.isEnabled()))
+          nom = await el.getAttribute("aria-label");
+        if (!nom && k === 0) await page.waitForTimeout(400);
+      }
+      if (!nom) throw new Error("aucun élément visible à glisser");
+    }
     for (let i = 0; i < n && !trouve; i += 1) {
       const bac = bacs.nth(i);
       if (glisser) {
-        // Vrai glisser-déposer au pointeur : on attrape le dernier déchet de la scène.
-        const a = await dechets.nth(avant - 1).boundingBox();
+        const a = await page.getByRole("button", { name: nom, exact: true }).boundingBox();
         const b = await bac.boundingBox();
         await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
         await page.mouse.down();

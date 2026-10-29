@@ -53,7 +53,12 @@ describe("contenu des missions", () => {
         if (o.image) expect(existsSync(join(process.cwd(), "public", o.image)), o.image).toBe(true);
       }
     }
-    expect(MISSIONS.filter((m) => m.zoneId === "village-tri").every((m) => m.scene)).toBe(true);
+    // Chaque monde a son mini-jeu, son décor et des objets dessinés.
+    for (const m of MISSIONS) {
+      expect(m.jeu, m.id).toBeDefined();
+      expect(m.scene, m.id).toBeDefined();
+      expect(m.objets.every((o) => o.image), m.id).toBe(true);
+    }
   });
 
   it("chaque mission a sa vignette illustrée, présente dans public/", () => {
