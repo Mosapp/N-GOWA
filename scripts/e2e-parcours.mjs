@@ -308,6 +308,45 @@ try {
   ok((await lireSave(foret)).missions["qui-vit-ou"]?.terminee, "mission de la Forêt enregistrée");
   await ctxFor.close();
 
+  /* ------------------------- Royaume de l'Énergie ------------------------- */
+  console.log("Royaume de l'Énergie");
+  const ctxEn = await browser.newContext({ ...devices["Pixel 5"] });
+  const en = await ctxEn.newPage();
+  await creerProfil(en, /4 ou 5 ans/);
+  await en.evaluate((k) => {
+    const s = JSON.parse(localStorage.getItem(k));
+    const iso = new Date().toISOString();
+    for (const id of [
+      "marche-adjoua", "cour-ecole", "seconde-vie", "objets-dangereux",
+      "chaque-goutte", "riviere-propre", "tresor-de-l-eau",
+      "qui-vit-ou", "amis-nature", "maison-propre",
+    ]) {
+      s.missions[id] = { meilleursPoints: 70, meilleuresEtoiles: 3, parties: 1, terminee: true, derniereFois: iso };
+    }
+    localStorage.setItem(k, JSON.stringify(s));
+  }, SAVE_KEY);
+  await en.reload();
+  await en.getByRole("button", { name: "Continuer l'aventure" }).first().click();
+  // Les pins des zones déjà terminées sont célébrés au retour.
+  while (await en.getByRole("button", { name: "Super !" }).isVisible().catch(() => false)) {
+    await en.getByRole("button", { name: "Super !" }).click();
+    await en.waitForTimeout(200);
+  }
+  ok(
+    await en.getByRole("button", { name: /^Le Royaume de l'Énergie : 0 missions sur 3/ }).first().isVisible(),
+    "le Royaume de l'Énergie s'ouvre après la Forêt",
+  );
+  await lancerMission(en, 1, /^Le Royaume de l'Énergie/);
+  ok((await en.getByRole("button", { name: /^Mettre « / }).count()) === 2, "« Chasse au gaspillage » : deux panneaux");
+  const e = await jouerTri(en, { glisser: true });
+  ok(e.objets === 5, "4-5 ans : 5 gestes classés");
+  await en.getByText("Mission réussie !").first().waitFor();
+  await en.getByRole("button", { name: "Continuer", exact: true }).click();
+  ok(await en.getByRole("heading", { name: /Le gardien des lumières/ }).isVisible(), "défi réel « éteindre la lumière » proposé");
+  await en.getByRole("button", { name: "Je relève le défi !" }).click();
+  ok((await lireSave(en)).missions["chasse-gaspillage"]?.terminee, "mission de l'Énergie enregistrée");
+  await ctxEn.close();
+
   console.log(`\n${etapes} vérifications réussies.`);
 } finally {
   await browser.close();

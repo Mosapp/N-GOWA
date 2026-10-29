@@ -110,7 +110,10 @@ export type CompetenceId =
   | "reutiliser-eau"
   | "connaitre-habitats"
   | "respecter-nature"
-  | "proteger-habitats";
+  | "proteger-habitats"
+  | "economiser-energie"
+  | "energies-renouvelables"
+  | "securite-electrique";
 
 export type BacId =
   | "plastique"
@@ -133,7 +136,13 @@ export type BacId =
   | "protege-nature"
   | "abime-nature"
   | "habitat-sain"
-  | "habitat-danger";
+  | "habitat-danger"
+  | "economise-energie"
+  | "gaspille-energie"
+  | "renouvelable"
+  | "epuisable"
+  | "sans-danger"
+  | "danger-electrique";
 
 export type BacContent = {
   id: BacId;
@@ -162,7 +171,13 @@ export type BacContent = {
     | "coeur"
     | "coeur-brise"
     | "maison"
-    | "danger";
+    | "danger"
+    | "ampoule"
+    | "ampoule-barree"
+    | "soleil"
+    | "bidon"
+    | "coche"
+    | "eclair";
   /** "poubelle" pour trier des objets, "panneau" pour classer des gestes. */
   forme?: "poubelle" | "panneau";
 };

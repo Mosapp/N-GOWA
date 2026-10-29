@@ -243,6 +243,51 @@ function Picto({ picto, couleur }: { picto: BacContent["picto"]; couleur: string
           <circle cx="0" cy="7.5" r="0.6" />
         </g>
       );
+    case "ampoule":
+      return (
+        <g {...trait}>
+          <path d="M-5 6 C -5 1, -10 -2, -10 -6 A 10 10 0 0 1 10 -6 C 10 -2, 5 1, 5 6 Z" fill={couleur} fillOpacity={0.2} />
+          <path d="M-4 10 H 4 M -3 13 H 3" />
+        </g>
+      );
+    case "ampoule-barree":
+      return (
+        <g {...trait}>
+          <path d="M-5 6 C -5 1, -10 -2, -10 -6 A 10 10 0 0 1 10 -6 C 10 -2, 5 1, 5 6 Z" fill={couleur} fillOpacity={0.12} />
+          <path d="M-4 10 H 4 M -3 13 H 3" />
+          <path d="M-13 -13 L 13 13" />
+        </g>
+      );
+    case "soleil":
+      return (
+        <g {...trait}>
+          <circle r="6" fill={couleur} fillOpacity={0.25} />
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((a) => (
+            <path key={a} d="M0 -10 V -13" transform={`rotate(${a})`} />
+          ))}
+        </g>
+      );
+    case "bidon":
+      return (
+        <g {...trait}>
+          <path d="M-8 -6 L -3 -11 H 8 V 12 H -8 Z" fill={couleur} fillOpacity={0.15} />
+          <path d="M2 -11 V -14 H 6 V -11 M -3 0 L 3 6 M 3 0 L -3 6" />
+        </g>
+      );
+    case "coche":
+      return (
+        <g {...trait}>
+          <circle r="12" fill={couleur} fillOpacity={0.12} />
+          <path d="M-6 0 L -2 5 L 7 -5" />
+        </g>
+      );
+    case "eclair":
+      return (
+        <g {...trait}>
+          <path d="M0 -13 L 13 11 H -13 Z" fill={couleur} fillOpacity={0.12} />
+          <path d="M1 -5 L -3 3 H 2 L -1 8" />
+        </g>
+      );
     case "poubelle":
       return (
         <g {...trait}>

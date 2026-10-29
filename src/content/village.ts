@@ -5,6 +5,7 @@ import type {
   DefiReelContent,
   MissionContent,
 } from "./types";
+import { ENERGIE_DEFIS, ENERGIE_MISSIONS } from "./energie";
 import { FORET_DEFIS, FORET_MISSIONS } from "./foret";
 import { RIVIERE_DEFIS, RIVIERE_MISSIONS } from "./riviere";
 import { ZONE_BY_ID } from "./zones";
@@ -151,6 +152,55 @@ export const BACS: Record<BacId, BacContent> = {
     picto: "danger",
     forme: "panneau",
   },
+  // --- Royaume de l'Énergie ---
+  "economise-energie": {
+    id: "economise-energie",
+    nom: "Économise l'électricité",
+    couleur: "#237A44",
+    couleurFoncee: "#175A31",
+    picto: "ampoule",
+    forme: "panneau",
+  },
+  "gaspille-energie": {
+    id: "gaspille-energie",
+    nom: "Gaspille l'électricité",
+    couleur: "#C9432C",
+    couleurFoncee: "#9E3220",
+    picto: "ampoule-barree",
+    forme: "panneau",
+  },
+  renouvelable: {
+    id: "renouvelable",
+    nom: "Énergie qui revient",
+    couleur: "#C98A0E",
+    couleurFoncee: "#8F610A",
+    picto: "soleil",
+    forme: "panneau",
+  },
+  epuisable: {
+    id: "epuisable",
+    nom: "Énergie qui s'épuise",
+    couleur: "#5B6770",
+    couleurFoncee: "#3E474E",
+    picto: "bidon",
+    forme: "panneau",
+  },
+  "sans-danger": {
+    id: "sans-danger",
+    nom: "Sans danger",
+    couleur: "#237A44",
+    couleurFoncee: "#175A31",
+    picto: "coche",
+    forme: "panneau",
+  },
+  "danger-electrique": {
+    id: "danger-electrique",
+    nom: "Danger électrique",
+    couleur: "#C9432C",
+    couleurFoncee: "#9E3220",
+    picto: "eclair",
+    forme: "panneau",
+  },
 };
 
 export const COMPETENCES: Record<CompetenceId, { nom: string; emoji: string }> = {
@@ -166,6 +216,9 @@ export const COMPETENCES: Record<CompetenceId, { nom: string; emoji: string }> =
   "connaitre-habitats": { nom: "Je sais où vivent les animaux de chez nous", emoji: "🐘" },
   "respecter-nature": { nom: "J'observe la nature sans l'abîmer", emoji: "🔍" },
   "proteger-habitats": { nom: "Je repère ce qui met les animaux en danger", emoji: "🐢" },
+  "economiser-energie": { nom: "Je repère le gaspillage d'électricité", emoji: "💡" },
+  "energies-renouvelables": { nom: "Je reconnais les énergies qui reviennent", emoji: "🔆" },
+  "securite-electrique": { nom: "Je connais les règles de sécurité électrique", emoji: "⚡" },
 };
 
 /** Nombre de bonnes réponses du premier coup pour qu'une compétence soit démontrée. */
@@ -722,10 +775,15 @@ const VILLAGE_DEFIS: DefiReelContent[] = [
 ];
 
 /** Tous les défis du vrai monde, toutes zones confondues. */
-export const DEFIS_REELS: DefiReelContent[] = [...VILLAGE_DEFIS, ...RIVIERE_DEFIS, ...FORET_DEFIS];
+export const DEFIS_REELS: DefiReelContent[] = [...VILLAGE_DEFIS, ...RIVIERE_DEFIS, ...FORET_DEFIS, ...ENERGIE_DEFIS];
 
 /** Toutes les missions jouables, toutes zones confondues. */
-export const MISSIONS: MissionContent[] = [...VILLAGE_MISSIONS, ...RIVIERE_MISSIONS, ...FORET_MISSIONS];
+export const MISSIONS: MissionContent[] = [
+  ...VILLAGE_MISSIONS,
+  ...RIVIERE_MISSIONS,
+  ...FORET_MISSIONS,
+  ...ENERGIE_MISSIONS,
+];
 
 export const DEFI_BY_ID = Object.fromEntries(DEFIS_REELS.map((d) => [d.id, d])) as Record<
   string,

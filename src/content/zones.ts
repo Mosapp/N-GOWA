@@ -2,9 +2,8 @@ import type { ZoneContent, ZoneId } from "./types";
 
 /**
  * Les quatre zones de la carte d'aventure.
- * Le Village du Tri, la Rivière Vivante et la Forêt des Découvertes sont
- * jouables ; une zone s'ouvre quand la précédente est terminée. Le Royaume
- * de l'Énergie est affiché « bientôt », sans mission simulée.
+ * Les quatre zones sont jouables ; chacune s'ouvre quand la précédente est
+ * terminée. Une zone marquée « bientot » s'affiche sans mission simulée.
  */
 export const ZONES: ZoneContent[] = [
   {
@@ -41,7 +40,7 @@ export const ZONES: ZoneContent[] = [
     pilier: "energie",
     accroche: "Économiser l'électricité avec l'aide du soleil.",
     couleur: "#C98A0E",
-    disponibilite: "bientot",
+    disponibilite: "jouable",
   },
 ];
 

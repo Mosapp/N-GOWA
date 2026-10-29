@@ -138,7 +138,7 @@ describe("déblocage des missions et des zones", () => {
     expect(statutZone(save, "village-tri")).toBe("ouverte");
     expect(statutZone(save, "riviere-vivante")).toBe("verrouillee");
     expect(statutZone(save, "foret-decouvertes")).toBe("verrouillee");
-    expect(statutZone(save, "royaume-energie")).toBe("bientot");
+    expect(statutZone(save, "royaume-energie")).toBe("verrouillee");
     for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
     expect(statutZone(save, "riviere-vivante")).toBe("ouverte");
     expect(prochaineMission(save)?.id).toBe("chaque-goutte");
@@ -156,6 +156,20 @@ describe("déblocage des missions et des zones", () => {
       obtenus.push(...bilan.nouveauxPins);
     }
     expect(obtenus).toContain("ami-nature");
+  });
+
+  it("toute l'aventure terminée : Énergie Maligne et Champion N'GOWA, même pour les 4-5 ans", () => {
+    let save = sauvegardeVide(NOW);
+    const obtenus: string[] = [];
+    for (const m of MISSIONS) {
+      // Partie « petit » : 5 objets du premier coup, pas de question.
+      const bilan = jouer(save, resultatParfait(m.id, 5, null));
+      save = bilan.save;
+      obtenus.push(...bilan.nouveauxPins);
+    }
+    expect(statutZone(save, "royaume-energie")).toBe("ouverte");
+    expect(obtenus).toEqual(expect.arrayContaining(["eco-tri", "gardien-eau", "ami-nature", "energie-maligne", "champion-ngowa"]));
+    expect(prochaineMission(save)).toBeNull();
   });
 
   it("Gardien de l'Eau s'obtient dans la Rivière Vivante", () => {
@@ -186,7 +200,7 @@ describe("pins", () => {
     expect(obtenus).toContain("eco-tri");
   });
 
-  it("les pins des zones à venir ne s'obtiennent pas avec des points de tri", () => {
+  it("les pins des autres zones ne s'obtiennent pas avec des points de tri", () => {
     let save = sauvegardeVide(NOW);
     for (let i = 0; i < 3; i += 1) {
       for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id, 9)).save;

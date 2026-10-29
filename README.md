@@ -24,7 +24,7 @@ npm run test:e2e     # parcours complet dans Chromium (Playwright requis, serveu
 
 | Dossier | Rôle |
 | --- | --- |
-| `src/content/` | Contenus éditoriaux : zones, missions du Village du Tri (`village.ts`), de la Rivière Vivante (`riviere.ts`) et de la Forêt des Découvertes (`foret.ts`), défis réels, pins (seuils configurables dans `pins.ts`), personnages. Les contenus des autres piliers (leçons, quiz, eau, biodiversité, énergie) sont conservés pour les futures zones. |
+| `src/content/` | Contenus éditoriaux : zones, missions du Village du Tri (`village.ts`), de la Rivière Vivante (`riviere.ts`), de la Forêt des Découvertes (`foret.ts`) et du Royaume de l'Énergie (`energie.ts`), défis réels, pins (seuils configurables dans `pins.ts`), personnages. Les contenus des autres piliers (leçons, quiz, eau, biodiversité, énergie) sont conservés pour les futures zones. |
 | `src/lib/game/` | Logique pure et testée : `rules.ts` (points, compétences, déblocages, pins, défis), `screenTime.ts`, `save.ts` (sauvegarde locale versionnée et réparée si abîmée), `parentPin.ts`, `store.ts` (store React + horloge). |
 | `src/components/screens/` | Écrans : accueil, création du profil, carte, zone, mission, pins, défis, espace parent, fiche, pause / fin de journée. |
 | `src/components/game/SortGame.tsx` | Mini-jeu de tri : glisser-déposer au doigt, ou toucher d'un bac (accessible au clavier). |
@@ -40,7 +40,7 @@ Toute la progression est dans le `localStorage` de l'appareil (clé `ngowa.sauve
 | Le Village du Tri | jouable | 4 missions de tri (plastique, papier, verre, épluchures, seconde vie, objets dangereux) |
 | La Rivière Vivante | jouable après le Village | 3 missions : gestes qui économisent l'eau, protéger la rivière, quelle eau pour les plantes |
 | La Forêt des Découvertes | jouable après la Rivière | 3 missions : qui vit où (habitats), gestes qui protègent la nature, habitats propres ou dangereux |
-| Le Royaume de l'Énergie | bientôt | — |
+| Le Royaume de l'Énergie | jouable après la Forêt | 3 missions : chasse au gaspillage, énergies qui reviennent, électricité sans danger |
 
 Illustrations : `npm run illustrations -- <dossier-des-jpg>` (voir `scripts/prepare-illustrations.mjs`).
 

@@ -111,10 +111,6 @@ export function ZoneScreen({
       </ol>
       </div>
 
-      <p className="mt-6 px-6 text-center text-sm font-bold text-ng-muted">
-        Les prochaines zones arrivent bientôt sur la carte.
-      </p>
-
       {ouverte ? (
         <MissionSheet
           mission={ouverte}
