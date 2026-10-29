@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 
-import { VillageScene } from "@/components/art/Scenes";
 import { IconCheck, IconLock, IconPlay } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
-import { Btn, CharacterMedallion, ScreenHeader, Sheet, SpeechBubble, Stars } from "@/components/ui";
+import { Btn, CharacterMedallion, Illustration, ScreenHeader, Sheet, SpeechBubble, Stars } from "@/components/ui";
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import type { MissionContent, ZoneId } from "@/content/types";
 import { ZONE_BY_ID } from "@/content/zones";
@@ -33,16 +32,19 @@ export function ZoneScreen({
   const peutJouer = statut?.etat === "libre" || statut?.etat === "bientot";
 
   return (
-    <main className="mx-auto w-full max-w-xl">
+    <main className="mx-auto w-full max-w-3xl lg:max-w-6xl lg:px-4 lg:pt-4">
       <ScreenHeader title={zone.nom} onBack={() => naviguer({ nom: "carte" })} sticky={false} />
-      <div className="overflow-hidden rounded-b-[2rem] shadow-[0_6px_0_rgba(45,42,38,0.06)]">
-        <VillageScene />
+      <div className="lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:px-4">
+      <div className="lg:sticky lg:top-6">
+        <div className="overflow-hidden rounded-b-[2rem] shadow-[0_6px_0_rgba(45,42,38,0.06)] sm:mx-4 sm:rounded-[2rem] lg:mx-0">
+          <Illustration src={zone.decor} alt={zone.nom} ratio="16 / 9" />
+        </div>
+        <p className="px-5 pt-3 text-center font-bold text-ng-muted">
+          {zone.accroche} · {pointsZone(save, zoneId)} points ici
+        </p>
       </div>
-      <p className="px-5 pt-3 text-center font-bold text-ng-muted">
-        {zone.accroche} · {pointsZone(save, zoneId)} points ici
-      </p>
 
-      <ol className="relative mx-auto mt-4 flex max-w-sm flex-col gap-3 px-5" aria-label="Missions">
+      <ol className="relative mx-auto mt-4 flex max-w-md flex-col gap-3 px-5 lg:mt-0 lg:max-w-none" aria-label="Missions">
         {missions.map((mission, i) => {
           const statutM = statutMission(save, mission);
           const record = save.missions[mission.id];
@@ -106,6 +108,7 @@ export function ZoneScreen({
           );
         })}
       </ol>
+      </div>
 
       <p className="mt-6 px-6 text-center text-sm font-bold text-ng-muted">
         Les prochaines zones arrivent bientôt sur la carte.
@@ -149,6 +152,7 @@ function MissionSheet({
 
   return (
     <Sheet label={mission.titre} onClose={onClose}>
+      <Illustration src={mission.vignette} ratio="16 / 9" className="mb-4 rounded-3xl" />
       <div className="flex items-center gap-3">
         <CharacterMedallion id={mission.personnageId} size={72} />
         <div>

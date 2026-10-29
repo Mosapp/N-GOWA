@@ -94,6 +94,8 @@ export type ZoneContent = {
   couleur: string;
   /** "jouable" : missions réellement disponibles ; "bientot" : zone annoncée, sans contenu. */
   disponibilite: "jouable" | "bientot";
+  /** Grand décor illustré de la zone. */
+  decor: string;
 };
 
 export type CompetenceId =
@@ -160,6 +162,8 @@ export type MissionContent = {
   /** Question de compréhension, uniquement pour les 6-10 ans. */
   question: QuestionMission;
   defiId: string;
+  /** Vignette illustrée de la mission. */
+  vignette: string;
 };
 
 export type DefiReelContent = {

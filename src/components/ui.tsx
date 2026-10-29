@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { IconBack, IconSound, IconStar } from "@/components/icons";
-import { MASCOTS, SECONDARY_CHARACTERS, type MascotId } from "@/content/characters";
+import { illustrationMascotte, MASCOTS, SECONDARY_CHARACTERS, type MascotId, type Pose } from "@/content/characters";
 import type { AvatarId } from "@/lib/game/save";
 import { playTone, speak, type Tone } from "@/lib/audio";
 
@@ -107,34 +107,35 @@ export function Mascot({
   size = 140,
   float = true,
   humeur = "calme",
+  pose,
   className = "",
 }: {
   id: MascotId;
   /** Hauteur affichée en pixels. */
   size?: number;
   float?: boolean;
-  /** Animation selon le moment : joie (réussite), indice (aide). */
+  /** Moment : joie (réussite), indice (aide). Choisit la pose et l'animation. */
   humeur?: "calme" | "joie" | "indice";
+  /** Pose précise (sinon déduite de l'humeur). */
+  pose?: Pose;
   className?: string;
 }) {
-  const m = MASCOTS[id];
+  const poseChoisie: Pose | undefined =
+    pose ?? (humeur === "joie" ? "bravo" : humeur === "indice" ? (id === "awa" ? "indice" : "reflechit") : undefined);
+  const m = illustrationMascotte(id, poseChoisie);
   const largeur = Math.round((size * m.largeur) / m.hauteur);
   const anim =
     humeur === "joie" ? "anim-bounce" : humeur === "indice" ? "anim-wiggle" : float ? "anim-float" : "";
   return (
     <div className={`relative shrink-0 ${className}`} style={{ width: largeur, height: size }}>
-      <div
-        className="absolute inset-x-[10%] bottom-0 h-[10%] rounded-[50%] bg-ng-ink/10 blur-[2px]"
-        aria-hidden
-      />
       {/* eslint-disable-next-line @next/next/no-img-element -- image locale optimisée, mise en cache hors ligne */}
       <img
-        key={humeur}
+        key={`${humeur}-${poseChoisie}`}
         src={m.image}
-        alt={m.nom}
+        alt={MASCOTS[id].nom}
         width={largeur}
         height={size}
-        className={`relative h-full w-full object-contain drop-shadow-[0_6px_8px_rgba(45,42,38,0.18)] ${anim}`}
+        className={`relative h-full w-full object-contain ${anim}`}
         draggable={false}
       />
     </div>
@@ -214,12 +215,13 @@ export function CharacterMedallion({ id, size = 64 }: { id: string; size?: numbe
   if (!c) return null;
   return (
     <div
-      className="flex shrink-0 items-center justify-center rounded-full border-4 border-white shadow-[0_4px_0_rgba(45,42,38,0.12)]"
-      style={{ width: size, height: size, background: `${c.couleur}33` }}
+      className="shrink-0 overflow-hidden rounded-full border-4 bg-white shadow-[0_4px_0_rgba(45,42,38,0.12)]"
+      style={{ width: size, height: size, borderColor: `${c.couleur}` }}
       role="img"
       aria-label={`${c.nom}, ${c.role}`}
     >
-      <span style={{ fontSize: size * 0.55, lineHeight: 1 }}>{c.emoji}</span>
+      {/* eslint-disable-next-line @next/next/no-img-element -- portrait local, mis en cache hors ligne */}
+      <img src={c.portrait} alt="" className="h-full w-full scale-[1.35] object-cover object-[50%_18%]" draggable={false} />
     </div>
   );
 }
@@ -248,11 +250,10 @@ export function Avatar({ id, size = 56 }: { id: AvatarId; size?: number }) {
       ) : (
         // eslint-disable-next-line @next/next/no-img-element -- portrait recadré depuis l'illustration locale
         <img
-          src={MASCOTS[a.id as MascotId].image}
+          src={illustrationMascotte(a.id as MascotId, "salue").image}
           alt=""
-          className={`absolute left-1/2 max-w-none -translate-x-1/2 ${
-            a.id === "awa" ? "top-[-30%] w-[150%]" : "top-[4%] w-[150%]"
-          }`}
+          className="absolute max-w-none"
+          style={a.id === "awa" ? { width: "205%", left: "-32%", top: "1%" } : { width: "235%", left: "-49%", top: "2%" }}
           draggable={false}
         />
       )}
@@ -301,7 +302,7 @@ export function ScreenHeader({
   sticky?: boolean;
 }) {
   return (
-    <header className={`${sticky ? "sticky top-0" : ""} z-20 flex items-center gap-3 bg-ng-cream/95 px-4 py-3 backdrop-blur`}>
+    <header className={`${sticky ? "sticky top-0 bg-ng-cream/95 backdrop-blur" : ""} z-20 flex items-center gap-3 px-4 py-3`}>
       {onBack ? (
         <button
           type="button"
@@ -370,5 +371,73 @@ export function Confetti() {
         />
       ))}
     </div>
+  );
+}
+
+/* ------------------------------ Illustrations ----------------------------- */
+
+export const DECORS = {
+  accueil: "/illustrations/decors/accueil.webp",
+  pause: "/illustrations/decors/pause.webp",
+  kofiRepos: "/illustrations/decors/kofi-repos.webp",
+  awaAuRevoir: "/illustrations/decors/awa-au-revoir.webp",
+  coffre: "/illustrations/decors/coffre.webp",
+};
+
+/** Image de décor qui remplit son parent (positionné en relatif). */
+export function DecorFond({
+  src,
+  position = "50% 50%",
+  voile = "from-ng-cream/0 to-ng-cream/0",
+  priorite = false,
+}: {
+  src: string;
+  position?: string;
+  /** Dégradé Tailwind posé par-dessus pour la lisibilité du texte. */
+  voile?: string;
+  priorite?: boolean;
+}) {
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element -- décor local optimisé, mis en cache hors ligne */}
+      <img
+        src={src}
+        alt=""
+        aria-hidden
+        loading={priorite ? "eager" : "lazy"}
+        decoding="async"
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ objectPosition: position }}
+        draggable={false}
+      />
+      <div className={`absolute inset-0 bg-gradient-to-r ${voile}`} aria-hidden />
+    </>
+  );
+}
+
+/** Image illustrée simple (vignette, scène), arrondie. */
+export function Illustration({
+  src,
+  alt = "",
+  className = "",
+  ratio = "16 / 9",
+}: {
+  src: string;
+  alt?: string;
+  className?: string;
+  ratio?: string;
+}) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- illustration locale optimisée, mise en cache hors ligne
+    <img
+      src={src}
+      alt={alt}
+      aria-hidden={alt ? undefined : true}
+      loading="lazy"
+      decoding="async"
+      className={`w-full object-cover ${className}`}
+      style={{ aspectRatio: ratio }}
+      draggable={false}
+    />
   );
 }

@@ -9,12 +9,19 @@
  * le localStorage de l'appareil.
  */
 
-const CACHE = "ngowa-v1";
+const CACHE = "ngowa-v2";
 const ESSENTIELS = [
   "/",
   "/manifest.webmanifest",
-  "/mascots/kofi.webp",
-  "/mascots/awa.webp",
+  // Illustrations nécessaires pour jouer hors ligne dès la première visite.
+  ...["kofi-salue", "kofi-montre", "kofi-bravo", "kofi-reflechit", "awa-salue", "awa-explique", "awa-bravo", "awa-indice"].map(
+    (n) => `/illustrations/mascots/${n}.webp`,
+  ),
+  ...["adjoua", "yao", "akissi", "bamba"].map((n) => `/illustrations/persos/${n}.webp`),
+  ...["marche-adjoua", "cour-ecole", "seconde-vie", "objets-dangereux"].map((n) => `/illustrations/missions/${n}.webp`),
+  ...["accueil", "village-tri", "riviere-vivante", "foret-decouvertes", "royaume-energie", "pause", "kofi-repos", "awa-au-revoir", "coffre"].map(
+    (n) => `/illustrations/decors/${n}.webp`,
+  ),
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];
@@ -78,6 +85,7 @@ function estStatique(url) {
   return (
     url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/mascots/") ||
+    url.pathname.startsWith("/illustrations/") ||
     url.pathname.startsWith("/icons/") ||
     /\.(?:woff2?|png|webp|svg|ico)$/.test(url.pathname)
   );

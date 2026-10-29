@@ -34,7 +34,7 @@ async function creerProfil(page, tranche) {
   await page.getByRole("button", { name: tranche }).click();
   await page.getByRole("button", { name: "Continuer" }).click();
   await page.getByRole("button", { name: "Passer" }).click();
-  await page.getByText("touche le Village du Tri").waitFor();
+  await page.getByRole("heading", { name: /Bonjour/ }).waitFor();
 }
 
 /** Joue la partie de tri : essaie les bacs dans l'ordre (donc avec des erreurs). */
@@ -134,7 +134,7 @@ try {
   ok(await page.getByRole("button", { name: /1 missions sur 4 terminées/ }).isVisible(), "progression conservée après rechargement");
 
   /* ------------------------- défi + validation parent ------------------------- */
-  await page.getByRole("button", { name: "Défis" }).click();
+  await page.getByRole("navigation", { name: "Navigation", exact: true }).getByRole("button", { name: /^Défis/ }).click();
   await page.getByRole("button", { name: "Je l'ai fait !" }).click();
   save = await lireSave(page);
   ok(save.defis["expliquer-tri"].statut === "declare", "défi déclaré par l'enfant, distinct d'une validation");
@@ -155,7 +155,7 @@ try {
   ok(await page.getByRole("heading", { name: "Héros du Vrai Monde" }).isVisible(), "pin « Héros du Vrai Monde » célébré");
   await page.getByRole("button", { name: "Super !" }).click();
 
-  await page.getByRole("button", { name: "Mes pins" }).click();
+  await page.getByRole("navigation", { name: "Navigation", exact: true }).getByRole("button", { name: /^Mes pins/ }).click();
   ok(await page.getByRole("button", { name: "Héros du Vrai Monde, obtenu" }).isVisible(), "pin visible dans la collection");
   ok(await page.getByRole("button", { name: "Gardien de l'Eau, pas encore obtenu" }).isVisible(), "pins futurs affichés comme à obtenir");
 
@@ -172,6 +172,11 @@ try {
   await page.reload();
   await page.getByRole("button", { name: "Continuer l'aventure" }).click();
   ok(await page.getByRole("button", { name: /1 missions sur 4 terminées/ }).isVisible(), "l'application se recharge sans connexion");
+  await page.waitForTimeout(800);
+  const imagesCassees = await page.evaluate(() =>
+    [...document.images].filter((img) => img.complete && img.naturalWidth === 0 && img.loading !== "lazy").map((img) => img.src),
+  );
+  ok(imagesCassees.length === 0, `illustrations affichées hors ligne (${imagesCassees.join(", ")})`);
   await lancerMission(page, 2);
   ok((await page.getByRole("button", { name: /^Mettre « / }).count()) === 4, "mission 2 hors ligne : quatre bacs");
   await jouerTri(page, { glisser: false });
@@ -216,7 +221,7 @@ try {
   await page.getByRole("button", { name: "Ouvrir" }).click();
   await page.getByRole("button", { name: /Accorder 10 minutes/ }).click();
   await page.getByRole("button", { name: "Retour" }).click();
-  ok(await page.getByRole("button", { name: /^Le Village du Tri/ }).isVisible(), "un adulte peut accorder du temps en plus");
+  ok(await page.getByRole("button", { name: /^Le Village du Tri/ }).first().isVisible(), "un adulte peut accorder du temps en plus");
   ok(erreurs.length === 0, `aucune erreur JavaScript (${erreurs.join(" | ")})`);
   await ctx.close();
 
