@@ -74,6 +74,8 @@ export type Reglages = {
   sons: boolean;
   voix: boolean;
   animationsReduites: boolean;
+  /** Bruits de la nature pendant les jeux (eau, oiseaux, marché, grillons). */
+  ambiance: boolean;
   /**
    * Choisi par un adulte : toutes les missions sont ouvertes, dans l'ordre
    * qu'on veut (aucun point ni pin n'est donné pour autant).
@@ -130,7 +132,7 @@ export function sauvegardeVide(now: number): Sauvegarde {
       pauseDebut: null,
       bonusJour: 0,
     },
-    reglages: { sons: true, voix: true, animationsReduites: false, toutOuvert: false },
+    reglages: { sons: true, voix: true, animationsReduites: false, ambiance: true, toutOuvert: false },
     parent: { pinHash: null, sel: null, echecs: 0, bloqueJusqua: null },
   };
 }
@@ -233,6 +235,7 @@ export function migrerSauvegarde(brut: unknown, now: number): Sauvegarde {
       sons: booleen(reglages.sons, true),
       voix: booleen(reglages.voix, true),
       animationsReduites: booleen(reglages.animationsReduites, false),
+      ambiance: booleen(reglages.ambiance, true),
       toutOuvert: booleen(reglages.toutOuvert, false),
     },
     parent: {

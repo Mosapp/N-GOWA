@@ -14,6 +14,7 @@ import { Shell } from "@/components/screens/Shell";
 import { DayEndScreen, PauseScreen } from "@/components/screens/TimeScreens";
 import { Logo, Welcome } from "@/components/screens/Welcome";
 import { ZoneScreen } from "@/components/screens/ZoneScreen";
+import { arreterAmbiance } from "@/lib/ambiance";
 import { reglerAudio, stopSpeaking } from "@/lib/audio";
 import {
   ajouterTempsActif,
@@ -65,11 +66,22 @@ export function NgowaApp() {
 
   const sons = save?.reglages.sons ?? true;
   const voix = save?.reglages.voix ?? true;
+  const ambiance = save?.reglages.ambiance ?? true;
   const animationsReduites = save?.reglages.animationsReduites ?? false;
 
   useEffect(() => {
-    reglerAudio({ sons, voix });
-  }, [sons, voix]);
+    reglerAudio({ sons, voix, ambiance });
+    if (!sons || !ambiance) arreterAmbiance();
+  }, [sons, voix, ambiance]);
+
+  // Application en arrière-plan : on coupe l'ambiance.
+  useEffect(() => {
+    const cacher = () => {
+      if (document.hidden) arreterAmbiance();
+    };
+    document.addEventListener("visibilitychange", cacher);
+    return () => document.removeEventListener("visibilitychange", cacher);
+  }, []);
 
   useEffect(() => {
     if (animationsReduites) document.documentElement.dataset.motion = "reduced";

@@ -243,6 +243,7 @@ export function ReglagesSheet({ reglages, onClose }: { reglages: Reglages; onClo
       <div className="mt-4 grid gap-3">
         <Toggle label="Les sons" emoji="🔔" actif={reglages.sons} onClick={() => basculer("sons")} />
         <Toggle label="La voix de Kofi et Awa" emoji="🗣️" actif={reglages.voix} onClick={() => basculer("voix")} />
+        <Toggle label="Les bruits de la nature" emoji="🐦" actif={reglages.ambiance} onClick={() => basculer("ambiance")} />
         <Toggle
           label="Moins d'animations"
           emoji="🐢"

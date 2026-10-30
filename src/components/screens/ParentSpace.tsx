@@ -342,6 +342,7 @@ function Tableau({ save, defiId, naviguer }: { save: Sauvegarde; defiId?: string
         <div className="mt-3 grid gap-2">
           <Toggle label="Sons" emoji="🔔" actif={save.reglages.sons} onClick={() => basculer("sons")} />
           <Toggle label="Voix" emoji="🗣️" actif={save.reglages.voix} onClick={() => basculer("voix")} />
+          <Toggle label="Bruits de la nature" emoji="🐦" actif={save.reglages.ambiance} onClick={() => basculer("ambiance")} />
           <Toggle
             label="Animations réduites"
             emoji="🐢"
