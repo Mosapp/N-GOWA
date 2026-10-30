@@ -348,7 +348,16 @@ function Tableau({ save, defiId, naviguer }: { save: Sauvegarde; defiId?: string
             actif={save.reglages.animationsReduites}
             onClick={() => basculer("animationsReduites")}
           />
+          <Toggle
+            label="Ouvrir tous les mondes"
+            emoji="🔓"
+            actif={save.reglages.toutOuvert}
+            onClick={() => basculer("toutOuvert")}
+          />
         </div>
+        <p className="mt-2 text-sm text-ng-muted">
+          Pour tester ou rejouer : toutes les missions s&apos;ouvrent, sans donner de points ni de pins.
+        </p>
       </section>
 
       {/* Données */}
