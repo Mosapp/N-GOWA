@@ -11,7 +11,7 @@ import { playTone, speak } from "@/lib/audio";
 import { BulleRetour, dedans, Etiquette, useConsigneDite, useGlisser, usePartie, useScene } from "./commun";
 
 /** Maisons du décor « village la nuit » (en % de l'image) : elles s'allument une à une. */
-const LUMIERES: [number, number][] = [
+export const LUMIERES: [number, number][] = [
   [25, 41], [34, 38], [52, 37], [57, 43], [66, 41], [76, 34], [84, 40],
   [76, 48], [22, 62], [37, 62], [52, 58], [66, 63], [78, 60],
 ];

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { PinBadge } from "@/components/art/PinBadge";
 import { JeuDeMission } from "@/components/game/JeuDeMission";
+import { FinDeMonde } from "@/components/screens/FinDeMonde";
 import { IconClose } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
 import {
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui";
 import { SECONDARY_CHARACTERS } from "@/content/characters";
 import { PIN_BY_ID } from "@/content/pins";
-import type { QuestionMission } from "@/content/types";
+import type { QuestionMission, ZoneId } from "@/content/types";
 import { BACS, COMPETENCES, DEFI_BY_ID, MISSION_BY_ID, vignetteDe } from "@/content/village";
 import {
   accepterDefi,
@@ -29,6 +30,7 @@ import {
   complexitePour,
   marquerPinsVus,
   melanger,
+  progressionZone,
   selectionnerObjets,
   type BilanMission,
   type ResultatObjet,
@@ -38,7 +40,7 @@ import type { StatutTemps } from "@/lib/game/screenTime";
 import { modifierSauvegarde } from "@/lib/game/store";
 import { playTone, speak, stopSpeaking } from "@/lib/audio";
 
-type Phase = "intro" | "jeu" | "question" | "resultat" | "defi";
+type Phase = "intro" | "jeu" | "question" | "resultat" | "monde" | "defi";
 
 /**
  * Déroulé d'une mission : histoire → mini-jeu → question (6-10 ans) →
@@ -68,6 +70,8 @@ export function MissionScreen({
   const [resultats, setResultats] = useState<ResultatObjet[]>([]);
   const [bilan, setBilan] = useState<BilanMission | null>(null);
   const [quitter, setQuitter] = useState(false);
+  /** Monde terminé pour la première fois avec cette mission : on fait la fête. */
+  const [mondeFini, setMondeFini] = useState<ZoneId | null>(null);
 
   if (!mission) return null;
   const perso = SECONDARY_CHARACTERS[mission.personnageId];
@@ -78,11 +82,16 @@ export function MissionScreen({
 
   const terminer = (objetsJoues: ResultatObjet[], questionReussie: boolean | null) => {
     let calcul: BilanMission | null = null;
+    let fini = false;
     modifierSauvegarde((s) => {
       calcul = appliquerResultat(s, { missionId, objets: objetsJoues, questionReussie }, new Date().toISOString());
+      const avant = progressionZone(s, mission.zoneId);
+      const apres = progressionZone(calcul.save, mission.zoneId);
+      fini = avant.terminees < avant.total && apres.terminees === apres.total;
       return calcul.save;
     });
     setBilan(calcul);
+    setMondeFini(fini ? mission.zoneId : null);
     setPhase("resultat");
   };
 
@@ -94,7 +103,7 @@ export function MissionScreen({
       <div className="mb-3 flex items-center gap-3">
         <button
           type="button"
-          onClick={() => (phase === "resultat" || phase === "defi" ? retourZone() : setQuitter(true))}
+          onClick={() => (phase === "resultat" || phase === "monde" || phase === "defi" ? retourZone() : setQuitter(true))}
           className="tap-target flex items-center justify-center rounded-2xl bg-white text-ng-muted shadow-[0_3px_0_rgba(45,42,38,0.1)]"
           aria-label="Quitter la mission"
         >
@@ -150,9 +159,17 @@ export function MissionScreen({
           tempsFini={statut?.etat === "pause-due" || statut?.etat === "fin-journee"}
           onContinue={() => {
             modifierSauvegarde(marquerPinsVus);
-            if (save.defis[mission.defiId]) retourZone();
+            if (mondeFini) setPhase("monde");
+            else if (save.defis[mission.defiId]) retourZone();
             else setPhase("defi");
           }}
+        />
+      ) : null}
+
+      {phase === "monde" && mondeFini ? (
+        <FinDeMonde
+          zoneId={mondeFini}
+          onContinue={() => (save.defis[mission.defiId] ? retourZone() : setPhase("defi"))}
         />
       ) : null}
 
