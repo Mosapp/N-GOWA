@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { PinBadge } from "@/components/art/PinBadge";
 import { JeuDeMission } from "@/components/game/JeuDeMission";
@@ -38,6 +38,7 @@ import {
 import type { Sauvegarde } from "@/lib/game/save";
 import type { StatutTemps } from "@/lib/game/screenTime";
 import { modifierSauvegarde } from "@/lib/game/store";
+import { arreterAmbiance, lancerAmbiance } from "@/lib/ambiance";
 import { playTone, speak, stopSpeaking } from "@/lib/audio";
 
 type Phase = "intro" | "jeu" | "question" | "resultat" | "monde" | "defi";
@@ -70,6 +71,13 @@ export function MissionScreen({
   const [resultats, setResultats] = useState<ResultatObjet[]>([]);
   const [bilan, setBilan] = useState<BilanMission | null>(null);
   const [quitter, setQuitter] = useState(false);
+  // Bruits du monde pendant le jeu seulement (pas pendant l'histoire ni la voix du résultat).
+  const zoneJeu = phase === "jeu" && mission ? mission.zoneId : null;
+  useEffect(() => {
+    if (zoneJeu) lancerAmbiance(zoneJeu);
+    else arreterAmbiance();
+    return () => arreterAmbiance();
+  }, [zoneJeu]);
   /** Monde terminé pour la première fois avec cette mission : on fait la fête. */
   const [mondeFini, setMondeFini] = useState<ZoneId | null>(null);
 

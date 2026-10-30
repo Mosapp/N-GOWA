@@ -6,15 +6,21 @@
 let audioCtx: AudioContext | null = null;
 
 /** Préférences de l'enfant : les sons et la voix peuvent être coupés. */
-const prefs = { sons: true, voix: true };
+const prefs = { sons: true, voix: true, ambiance: true };
 
-export function reglerAudio(next: { sons: boolean; voix: boolean }) {
+export function reglerAudio(next: { sons: boolean; voix: boolean; ambiance: boolean }) {
   prefs.sons = next.sons;
   prefs.voix = next.voix;
+  prefs.ambiance = next.ambiance;
   if (!next.voix) stopSpeaking();
 }
 
-function getCtx(): AudioContext | null {
+/** Les sons d'ambiance jouent seulement si les sons ET l'ambiance sont activés. */
+export function ambianceAutorisee() {
+  return prefs.sons && prefs.ambiance;
+}
+
+export function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   const Ctor =
     window.AudioContext ??
