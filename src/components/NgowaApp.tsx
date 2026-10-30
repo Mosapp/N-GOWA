@@ -15,6 +15,8 @@ import { DayEndScreen, PauseScreen } from "@/components/screens/TimeScreens";
 import { Logo, Welcome } from "@/components/screens/Welcome";
 import { ZoneScreen } from "@/components/screens/ZoneScreen";
 import { arreterAmbiance } from "@/lib/ambiance";
+// Écoute tôt l'invitation à installer l'app (envoyée juste après le chargement).
+import "@/lib/installation";
 import { reglerAudio, stopSpeaking } from "@/lib/audio";
 import {
   ajouterTempsActif,

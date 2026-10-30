@@ -5,6 +5,7 @@ import { useState } from "react";
 import { IconLock, IconSheet } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
 import { Btn, ProgressBar, ScreenHeader } from "@/components/ui";
+import { CarteInstallation } from "@/components/Installation";
 import { Toggle } from "@/components/screens/Shell";
 import type { TrancheAge } from "@/content/types";
 import { DEFI_BY_ID, DEFIS_REELS } from "@/content/village";
@@ -360,6 +361,8 @@ function Tableau({ save, defiId, naviguer }: { save: Sauvegarde; defiId?: string
           Pour tester ou rejouer : toutes les missions s&apos;ouvrent, sans donner de points ni de pins.
         </p>
       </section>
+
+      <CarteInstallation />
 
       {/* Données */}
       <section className="card-ng p-5">
