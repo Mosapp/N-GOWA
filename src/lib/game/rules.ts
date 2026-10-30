@@ -139,6 +139,7 @@ export function missionsDeZone(zoneId: ZoneId): MissionContent[] {
 
 export function statutMission(save: Sauvegarde, mission: MissionContent): StatutMission {
   if (save.missions[mission.id]?.terminee) return "terminee";
+  if (save.reglages.toutOuvert) return "disponible";
   const precedente = missionsDeZone(mission.zoneId).find((m) => m.ordre === mission.ordre - 1);
   if (!precedente || save.missions[precedente.id]?.terminee) return "disponible";
   return "verrouillee";
@@ -156,7 +157,7 @@ export function statutZone(save: Sauvegarde, zoneId: ZoneId): StatutZone {
   const zone = ZONES[index];
   if (!zone || zone.disponibilite !== "jouable" || !missionsDeZone(zoneId).length) return "bientot";
   const precedente = ZONES[index - 1];
-  if (!precedente) return "ouverte";
+  if (!precedente || save.reglages.toutOuvert) return "ouverte";
   const prog = progressionZone(save, precedente.id);
   return prog.terminees >= prog.total ? "ouverte" : "verrouillee";
 }

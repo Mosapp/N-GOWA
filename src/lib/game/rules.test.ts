@@ -20,6 +20,7 @@ import {
   selectionnerObjets,
   statutMission,
   statutZone,
+  synchroniserPins,
   validerDefi,
   type ResultatMission,
 } from "./rules";
@@ -167,6 +168,17 @@ describe("déblocage des missions et des zones", () => {
     for (const m of VILLAGE_MISSIONS) save = jouer(save, resultatParfait(m.id)).save;
     expect(statutZone(save, "riviere-vivante")).toBe("ouverte");
     expect(prochaineMission(save)?.id).toBe("chaque-goutte");
+  });
+
+  it("« Ouvrir tous les mondes » (parent) ouvre tout sans donner de points ni de pins", () => {
+    const save = sauvegardeVide(NOW);
+    save.reglages.toutOuvert = true;
+    for (const z of ["village-tri", "riviere-vivante", "foret-decouvertes", "royaume-energie"] as const) {
+      expect(statutZone(save, z)).toBe("ouverte");
+    }
+    for (const m of MISSIONS) expect(statutMission(save, m)).toBe("disponible");
+    expect(pointsTotal(save)).toBe(0);
+    expect(synchroniserPins(save, new Date(NOW).toISOString()).nouveaux).toEqual([]);
   });
 
   it("la Forêt s'ouvre après la Rivière, et Ami de la Nature s'y obtient", () => {
