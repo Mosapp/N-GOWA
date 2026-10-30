@@ -297,6 +297,25 @@ body {
     opacity: 0.3;
   }
 }
+/* Fin de monde : poissons qui sautent, maisons qui s'allument. */
+@keyframes ng-saut {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  30% {
+    transform: translateY(-40%) rotate(-12deg);
+  }
+}
+@keyframes ng-allume {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 /* La poubelle « avale » le déchet : petit tassement puis rebond. */
 @keyframes ng-gobe {
   0%,
@@ -331,6 +350,12 @@ body {
 }
 .anim-vers-batterie {
   animation: ng-vers-batterie 0.5s cubic-bezier(0.5, -0.2, 0.7, 1) forwards;
+}
+.anim-saut {
+  animation: ng-saut 2.2s ease-in-out infinite;
+}
+.anim-allume {
+  animation: ng-allume 0.6s ease-out both;
 }
 .anim-gobe {
   transform-origin: 50% 100%;

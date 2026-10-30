@@ -13,7 +13,7 @@ import { BulleRetour, dedans, Etiquette, useConsigneDite, useGlisser, usePartie,
 /** Rives et lit de la rivière dans le décor (en % de l'image). */
 const RIVE_GAUCHE = [0, 0, 34, 100] as const;
 const RIVE_DROITE = [66, 0, 100, 100] as const;
-const LIT = [32, 0, 69, 100] as const;
+export const LIT = [32, 0, 69, 100] as const;
 
 /**
  * « La rivière qui coule » : des radeaux descendent la rivière, chacun porte
