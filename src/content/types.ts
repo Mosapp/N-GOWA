@@ -205,6 +205,9 @@ export type QuestionMission = {
   explication: string;
 };
 
+/** Mini-jeu de la mission : un par monde. */
+export type JeuMission = "ramassage" | "riviere" | "nature" | "interrupteur";
+
 export type MissionContent = {
   id: string;
   zoneId: ZoneId;
@@ -224,8 +227,10 @@ export type MissionContent = {
   defiId: string;
   /** Vignette illustrée de la mission (sinon, le décor de la zone). */
   vignette?: string;
-  /** Décor vide où l'on pose les objets dessinés à ramasser. */
+  /** Décor du mini-jeu (vide : les objets dessinés y sont posés). */
   scene?: string;
+  /** Mini-jeu (sinon, le tri dans des bacs). */
+  jeu?: JeuMission;
 };
 
 export type DefiReelContent = {

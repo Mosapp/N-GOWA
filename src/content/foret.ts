@@ -1,3 +1,4 @@
+import { illustrer } from "./illustrations";
 import type { DefiReelContent, MissionContent } from "./types";
 
 /* ------------------------------------------------------------------ */
@@ -6,7 +7,7 @@ import type { DefiReelContent, MissionContent } from "./types";
 /* lagunes, jardins). Même mécanique de glisser-déposer.               */
 /* ------------------------------------------------------------------ */
 
-export const FORET_MISSIONS: MissionContent[] = [
+const MISSIONS: MissionContent[] = [
   {
     id: "qui-vit-ou",
     vignette: "/illustrations/missions/qui-vit-ou.webp",
@@ -171,7 +172,7 @@ export const FORET_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "Ce geste protège la nature ? Ou il l'abîme ?",
-      grand: "Glisse chaque geste du bon côté : il protège la nature, ou il l'abîme.",
+      grand: "Glisse chaque scène dans la bonne forêt : celle qui est protégée, ou celle qui est abîmée.",
     },
     objectif: {
       japprends: "Certains gestes protègent les plantes et les animaux, d'autres les abîment.",
@@ -283,7 +284,7 @@ export const FORET_MISSIONS: MissionContent[] = [
     },
     consigne: {
       petit: "C'est bon pour les animaux ? Ou c'est un danger ?",
-      grand: "Glisse chaque situation du bon côté : bonne pour les animaux, ou dangereuse pour eux.",
+      grand: "Glisse chaque scène dans la bonne forêt : bonne pour les animaux, ou dangereuse pour eux.",
     },
     objectif: {
       japprends: "Un habitat propre et calme aide les animaux à vivre et à avoir des petits.",
@@ -382,6 +383,8 @@ export const FORET_MISSIONS: MissionContent[] = [
     defiId: "chasseur-de-sachets",
   },
 ];
+
+export const FORET_MISSIONS = illustrer(MISSIONS, "nature", (m) => (m.id === "qui-vit-ou" ? "habitats" : "nature"));
 
 export const FORET_DEFIS: DefiReelContent[] = [
   {

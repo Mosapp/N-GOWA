@@ -8,6 +8,7 @@ import type {
 import { ENERGIE_DEFIS, ENERGIE_MISSIONS } from "./energie";
 import { FORET_DEFIS, FORET_MISSIONS } from "./foret";
 import { RIVIERE_DEFIS, RIVIERE_MISSIONS } from "./riviere";
+import { illustrer } from "./illustrations";
 import { ZONE_BY_ID } from "./zones";
 
 /* ------------------------------------------------------------------ */
@@ -719,11 +720,7 @@ const MISSIONS_DU_VILLAGE: MissionContent[] = [
 ];
 
 /** Les déchets du village sont de vrais objets dessinés, posés dans un décor vide. */
-export const VILLAGE_MISSIONS: MissionContent[] = MISSIONS_DU_VILLAGE.map((m) => ({
-  ...m,
-  scene: `/illustrations/scenes/${m.id}.webp`,
-  objets: m.objets.map((o) => ({ ...o, image: `/illustrations/objets/${o.id}.webp` })),
-}));
+export const VILLAGE_MISSIONS = illustrer(MISSIONS_DU_VILLAGE, "ramassage", (m) => m.id);
 
 /* ------------------------------------------------------------------ */
 /* Défis du vrai monde                                                 */

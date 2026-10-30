@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { PinBadge } from "@/components/art/PinBadge";
-import { SortGame } from "@/components/game/SortGame";
+import { JeuDeMission } from "@/components/game/JeuDeMission";
 import { IconClose } from "@/components/icons";
 import type { Naviguer } from "@/components/navigation";
 import {
@@ -119,7 +119,8 @@ export function MissionScreen({
       ) : null}
 
       {phase === "jeu" ? (
-        <SortGame
+        <JeuDeMission
+          jeu={mission.jeu}
           objets={objets}
           bacs={mission.bacs[complexite]}
           complexite={complexite}
