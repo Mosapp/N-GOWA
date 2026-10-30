@@ -1,6 +1,7 @@
 "use client";
 
 import { Emblem } from "@/components/art/Emblem";
+import { BoutonInstaller } from "@/components/Installation";
 import { Btn, DecorFond, DECORS, Mascot, SpeechBubble } from "@/components/ui";
 import { warmUpAudio } from "@/lib/audio";
 
@@ -64,6 +65,7 @@ export function Welcome({
           >
             {pseudo ? "Continuer l'aventure" : "Commencer l'aventure"}
           </Btn>
+          <BoutonInstaller />
         </div>
       </div>
     </main>

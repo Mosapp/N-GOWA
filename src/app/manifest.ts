@@ -9,7 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    orientation: "portrait",
+    // Téléphone, tablette et PC : l'app suit l'orientation de l'écran.
+    orientation: "any",
     background_color: "#FFF6E6",
     theme_color: "#237A44",
     icons: [
